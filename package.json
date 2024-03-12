@@ -1,0 +1,52 @@
+{
+  "name": "application_framework",
+  "version": "1.0.0",
+  "description": "驱动器模块，用于提供api接口整合",
+  "main": "index.js",
+  "scripts": {
+    "start": "NODE_ENV=production node ./src/index.js",
+    "dev": "NODE_ENV=production nodemon --trace-deprecation ./src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cluster": "^0.7.7",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.3",
+    "glob": "^10.3.10",
+    "hprose": "^2.0.51",
+    "knex": "^3.1.0",
+    "module-alias": "^2.2.3",
+    "moment-timezone": "^0.5.45",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.9.2",
+    "node-schedule": "^2.1.1",
+    "os": "^0.1.2",
+    "path": "^0.12.7",
+    "redis": "^4.6.13",
+    "xss": "^1.0.15"
+  },
+  "_moduleAliases": {
+    "@root": ".",
+    "@src": "src",
+    "@app": "src/app",
+    "@cast": "src/app/cast",
+    "@controller": "src/app/controller",
+    "@route": "src/app/route",
+    "@helper": "src/app/helper",
+    "@middleware": "src/app/middleware",
+    "@model": "src/app/model",
+    "@schedule": "src/app/schedule",
+    "@service": "src/app/service",
+    "@config": "src/config",
+    "@logger": "src/logger",
+    "@resources": "src/resources",
+    "@utils": "src/utils",
+    "@static": "src/static"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
