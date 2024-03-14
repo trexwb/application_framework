@@ -2,7 +2,7 @@
  * @Author: trexwb
  * @Date: 2024-01-12 08:45:55
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-13 18:52:24
+ * @LastEditTime: 2024-03-14 11:49:54
  * @FilePath: /laboratory/application/drive/src/app/model/secretsLogs.js
  * @Description: 
  * @一花一世界，一叶一如来
@@ -48,18 +48,12 @@ module.exports = {
 					row.updated_at = moment(row.updated_at).tz('Asia/Shanghai').format('YYYY-MM-DD HH:mm:ss');
 					return row;
 				})
-				.catch(() => {
+				.catch((error) => {
+					logCast.writeError(error.toString());
 					return false;
 				});
-		} catch (err) {
-			logCast.writeError(
-				err.toString(),
-				await dbRead.select([...new Set([...this.$guarded, ...this.$fillable, ...this.$hidden])])
-					.from(this.$table)
-					.where(where)
-					.first()
-					.toString()
-			);
+		} catch (error) {
+			logCast.writeError(error.toString());
 			return false;
 		}
 	},
@@ -108,11 +102,8 @@ module.exports = {
 						return await dbWrite(this.$table).insert({ ...dataRow, created_at: dbWrite.fn.now(), updated_at: dbWrite.fn.now() });
 					}
 				});
-			} catch (err) {
-				logCast.writeError(
-					err.toString(),
-					dataRow
-				);
+			} catch (error) {
+				logCast.writeError(error.toString());
 				return false;
 			}
 		}

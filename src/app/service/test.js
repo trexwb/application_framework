@@ -2,7 +2,7 @@
  * @Author: trexwb
  * @Date: 2024-01-17 13:50:21
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-11 11:06:46
+ * @LastEditTime: 2024-03-14 09:29:11
  * @FilePath: /laboratory/application/drive/src/app/service/account.js
  * @Description: 
  * @一花一世界，一叶一如来
@@ -46,35 +46,28 @@ module.exports = {
 		} else {
 			this.proxy = await this.getClient.useService();
 		}
-		// return await proxy.login("access", "password").then(function (result) {
-		// 	return result;
-		// }).catchError(function (err) {
-		// 	return err;
-		// });
 		return this.proxy;
 	},
-	connectionService: async function (req, next) {
+	connectionService: async function (req) {
 		if (req.siteId) {
 			this.setSiteId(req.siteId)
 		}
-		this.serverRow = await serversHelper.getKey('account');
+		this.serverRow = await serversHelper.getKey('微服务的名称');
 		if (!this.serverRow?.id) {
-			return req.handleError(500020001);
+			return req.handleError(500019001);
 		}
 		await this.setClient();
 		if (!this.proxy) {
-			return req.handleError(500020002);
+			return req.handleError(500019002);
 		}
 		return this.proxy;
 	},
-	decryptData: async function (result, req, next) {
+	decryptData: async function (result) {
 		if (result && result.encryptedData && result.iv) {
-			result = cryptTool.decrypt(result.encryptedData, this.serverRow?.app_secret, _data.iv);
+			result = cryptTool.decrypt(result.encryptedData, this.serverRow?.app_secret, data.iv);
 		}
-		if (result && result.error) {
-			if (req, next) {
-				return req.handleError(500020003);
-			}
+		if (result?.error) {
+			throw result?.error;
 		}
 		return result;
 	}

@@ -26,8 +26,8 @@ const getList = async (req, res, next) => {
     const page = req.body.page || 1;
     const pageSize = req.body.pageSize || 10;
     return await secretsHelper.getList(where, sort, page, pageSize);
-  } catch (err) {
-    return req.handleError(500002001, err);
+  } catch (error) {
+    return req.handleError(500002001, error);
   }
 }
 
@@ -44,8 +44,8 @@ const getRow = async (req, res, next) => {
     }
     delete secretRow.app_secret;
     return secretRow;
-  } catch (err) {
-    return req.handleError(500002002, err);
+  } catch (error) {
+    return req.handleError(500002002, error);
   }
 }
 
@@ -72,8 +72,8 @@ const save = async (req, res, next) => {
       data.extension = req.body.extension;
     }
     return await secretsHelper.save(data);
-  } catch (err) {
-    return req.handleError(500002003, err);
+  } catch (error) {
+    return req.handleError(500002003, error);
   }
 }
 
@@ -95,8 +95,8 @@ const update = async (req, res, next) => {
       id: secretRow.id,
       app_secret: utils.generateRandomString(64)
     });
-  } catch (err) {
-    return req.handleError(500002004, err);
+  } catch (error) {
+    return req.handleError(500002004, error);
   }
 }
 
@@ -110,8 +110,8 @@ const enable = async (req, res, next) => {
       id: id || 0,
       status: 1
     });
-  } catch (err) {
-    return req.handleError(500002005, err);
+  } catch (error) {
+    return req.handleError(500002005, error);
   }
 }
 
@@ -130,8 +130,8 @@ const disable = async (req, res, next) => {
       id: id || 0,
       status: 0
     });
-  } catch (err) {
-    return req.handleError(500002006, err);
+  } catch (error) {
+    return req.handleError(500002006, error);
   }
 }
 
@@ -149,8 +149,8 @@ const softDelete = async (req, res, next) => {
     return await secretsHelper.delete({
       id: id || 0
     });
-  } catch (err) {
-    return req.handleError(500002007, err);
+  } catch (error) {
+    return req.handleError(500002007, error);
   }
 }
 
@@ -164,7 +164,7 @@ const verifyCode = async (code, currentAccount) => {
       return false;
     }
     return accountRow;
-  } catch (err) {
+  } catch (error) {
     return false;
   }
 }

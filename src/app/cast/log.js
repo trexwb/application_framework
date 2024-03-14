@@ -2,7 +2,7 @@
  * @Author: trexwb
  * @Date: 2024-03-13 12:12:05
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-13 16:52:08
+ * @LastEditTime: 2024-03-14 11:34:03
  * @FilePath: /laboratory/application/drive/src/app/cast/log.js
  * @Description: 
  * @一花一世界，一叶一如来
@@ -40,20 +40,20 @@ module.exports = {
 					source: ip || '127.0.0.1'
 				}
 			};
-			this.connection().putLogs(param, function (err) {
-				if (err) {
-					console.error('error:', err)
+			this.connection().putLogs(param, function (error) {
+				if (error) {
+					console.error('error:', error)
 				}
 			});
-		} catch (err) {
-			console.error(`error:`, err);
+		} catch (error) {
+			console.error(`error:`, error);
 			// Here can be added error retry logic or error reporting
 		}
 	},
 	writeError: function (msg, data, ip) {
-		this.putLogs('error', msg, data, ip);
+		this.putLogs(`error[${process.env.NODE_ENV}]`, msg, data, ip);
 	},
 	writeInfo: function (msg, data) {
-		this.putLogs('info', msg, data);
+		this.putLogs(`info[${process.env.NODE_ENV}]`, msg, data);
 	}
 }

@@ -2,7 +2,7 @@
  * @Author: trexwb
  * @Date: 2024-01-10 08:57:26
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-13 18:31:48
+ * @LastEditTime: 2024-03-14 13:38:22
  * @FilePath: /laboratory/application/drive/src/app/model/secrets.js
  * @Description: 
  * @一花一世界，一叶一如来
@@ -57,19 +57,12 @@ module.exports = {
 					row.updated_at = moment(row.updated_at).tz('Asia/Shanghai').format('YYYY-MM-DD HH:mm:ss');
 					return row;
 				})
-				.catch(() => {
+				.catch((error) => {
+					logCast.writeError(error.toString());
 					return false;
 				});
-		} catch (err) {
-			logCast.writeError(
-				err.toString(),
-				await dbRead.select([...new Set([...this.$guarded, ...this.$fillable, ...this.$hidden])])
-					.from(this.$table)
-					.where(where)
-					.whereNull('deleted_at')
-					.first()
-					.toString()
-			);
+		} catch (error) {
+			logCast.writeError(error.toString());
 			return false;
 		}
 	},
@@ -86,19 +79,12 @@ module.exports = {
 					row.updated_at = moment(row.updated_at).tz('Asia/Shanghai').format('YYYY-MM-DD HH:mm:ss');
 					return row;
 				})
-				.catch(() => {
+				.catch((error) => {
+					logCast.writeError(error.toString());
 					return false;
 				});
-		} catch (err) {
-			logCast.writeError(
-				err.toString(),
-				await dbRead.select([...new Set([...this.$guarded, ...this.$fillable, ...this.$hidden])])
-					.from(this.$table)
-					.where(where)
-					.whereNotNull('deleted_at')
-					.first()
-					.toString()
-			);
+		} catch (error) {
+			logCast.writeError(error.toString());
 			return false;
 		}
 	},
@@ -127,26 +113,16 @@ module.exports = {
 							updated_at: moment(row.updated_at).tz('Asia/Shanghai').format('YYYY-MM-DD HH:mm:ss')
 						}))
 					})
-					.catch(() => {
+					.catch((error) => {
+						logCast.writeError(error.toString());
 						return false;
 					});
 				return { total: total, list: rows };
 			} else {
 				return { total: 0, list: [] };
 			}
-		} catch (err) {
-			logCast.writeError(
-				err.toString(),
-				await dbRead.select([...new Set([...this.$guarded, ...this.$fillable])])
-					.from(this.$table)
-					.where(where)
-					.whereNull('deleted_at')
-					// .orderByRaw('if(`sort`>0,1,0) DESC,sort ASC').orderBy([{ column: 'sort', order: 'ASC' }]) // 有排序sort字段时使用
-					.orderBy(order)
-					.limit(limit || 10)
-					.offset(offset || 0)
-					.toString()
-			);
+		} catch (error) {
+			logCast.writeError(error.toString());
 			return { total: 0, list: [] };
 		}
 	},
@@ -175,26 +151,16 @@ module.exports = {
 							updated_at: moment(row.updated_at).tz('Asia/Shanghai').format('YYYY-MM-DD HH:mm:ss')
 						}))
 					})
-					.catch(() => {
+					.catch((error) => {
+						logCast.writeError(error.toString());
 						return false;
 					});
 				return { total: total, list: rows };
 			} else {
 				return { total: 0, list: [] };
 			}
-		} catch (err) {
-			logCast.writeError(
-				err.toString(),
-				await dbRead.select([...new Set([...this.$guarded, ...this.$fillable])])
-					.from(this.$table)
-					.where(where)
-					.whereNotNull('deleted_at')
-					// .orderByRaw('if(`sort`>0,1,0) DESC').orderBy([{ column: 'sort', order: 'ASC' }]) // 有排序sort字段时使用
-					.orderBy(order)
-					.limit(limit || 10)
-					.offset(offset || 0)
-					.toString()
-			);
+		} catch (error) {
+			logCast.writeError(error.toString());
 			return { total: 0, list: [] };
 		}
 	},
@@ -243,12 +209,8 @@ module.exports = {
 						return await dbWrite(this.$table).insert({ ...dataRow, created_at: dbWrite.fn.now(), updated_at: dbWrite.fn.now() });
 					}
 				});
-			} catch (err) {
-				logCast.writeError(
-					err.toString(),
-					data
-
-				);
+			} catch (error) {
+				logCast.writeError(error.toString());
 				return false;
 			}
 		}
@@ -262,16 +224,8 @@ module.exports = {
 				.update({
 					deleted_at: null
 				});
-		} catch (err) {
-			logCast.writeError(
-				err.toString(),
-				await dbWrite(this.$table)
-					.where(where)
-					.update({
-						deleted_at: null
-					})
-					.toString()
-			);
+		} catch (error) {
+			logCast.writeError(error.toString());
 			return false;
 		}
 	},
@@ -284,16 +238,8 @@ module.exports = {
 				.update({
 					deleted_at: dbWrite.fn.now()
 				});
-		} catch (err) {
-			logCast.writeError(
-				err.toString(),
-				await dbWrite(this.$table)
-					.where(where)
-					.update({
-						deleted_at: dbWrite.fn.now()
-					})
-					.toString()
-			);
+		} catch (error) {
+			logCast.writeError(error.toString());
 			return false;
 		}
 	}

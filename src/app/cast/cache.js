@@ -2,7 +2,7 @@
  * @Author: trexwb
  * @Date: 2024-01-09 08:52:32
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-13 15:47:42
+ * @LastEditTime: 2024-03-14 10:50:28
  * @FilePath: /laboratory/application/drive/src/app/cast/cache.js
  * @Description: 
  * @一花一世界，一叶一如来
@@ -29,6 +29,9 @@ module.exports = {
           database: redisConfig.db || 1,
         });
         await this.client.connect();
+        this.client.on('close', function () {
+          this.client = null;
+        });
       } catch (error) {
         logCast.writeError(`Error initializing Redis client: ${error}`);
         // 重新抛出异常，以便调用者可以捕获并进行进一步处理
@@ -47,7 +50,6 @@ module.exports = {
       }
     } catch (error) {
       logCast.writeError(`Error setting Redis value: ${error}`);
-      return false;
     }
   },
 
@@ -68,7 +70,6 @@ module.exports = {
       await this.client.del(redisConfig.prefix + key);
     } catch (error) {
       logCast.writeError(`Error deleting Redis key: ${error}`);
-      return false;
     }
   },
 
@@ -82,7 +83,6 @@ module.exports = {
       ]);
     } catch (error) {
       logCast.writeError(`Error setting cache with tags: ${error}`);
-      return false;
     }
   },
 
@@ -96,7 +96,6 @@ module.exports = {
       await this.client.del(`${redisConfig.prefix}tag:${tag}`);
     } catch (error) {
       logCast.writeError(`Error clearing cache by tag: ${error}`);
-      return false;
     }
   },
 
@@ -104,11 +103,10 @@ module.exports = {
     if (this.client) {
       try {
         await this.client.quit();
-        this.client = null;
       } catch (error) {
         logCast.writeError(`Error destroying Redis client: ${error}`);
-        return false;
       }
     }
+    this.client = null;
   }
 };

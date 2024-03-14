@@ -2,7 +2,7 @@
  * @Author: trexwb
  * @Date: 2024-01-12 08:45:55
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-13 17:40:54
+ * @LastEditTime: 2024-03-14 09:50:59
  * @FilePath: /laboratory/application/drive/src/app/helper/secrets.js
  * @Description: 
  * @一花一世界，一叶一如来
@@ -53,7 +53,9 @@ module.exports = {
 					cacheCast.setCacheWithTags('secrets', cacheKey, row)
 				}
 			}
-		} catch (err) { }
+		} catch (error) {
+			throw error;
+		}
 		return row;
 	},
 	getList: async function (where, order, _page, _pageSize) { // await secretsHelper.getList({keywords: '1',status: '0'});
@@ -72,7 +74,9 @@ module.exports = {
 					cacheCast.setCacheWithTags('secrets', cacheKey, rows);
 				}
 			}
-		} catch (err) { }
+		} catch (error) {
+			throw error;
+		}
 		return rows;
 	},
 	getId: async function (id) {
@@ -89,7 +93,9 @@ module.exports = {
 					cacheCast.setCacheWithTags('secrets', cacheKey, row);
 				}
 			}
-		} catch (err) { }
+		} catch (error) {
+			throw error;
+		}
 		return row;
 	},
 	save: async function (data) {
@@ -98,7 +104,9 @@ module.exports = {
 		try {
 			affects = await secretsModel.save(data);
 			await cacheCast.clearCacheByTag('secrets');
-		} catch (err) { }
+		} catch (error) {
+			throw error;
+		}
 		return affects;
 	},
 	restore: async function (id) {
@@ -109,7 +117,9 @@ module.exports = {
 				buildWhere(this, { "id": id })
 			});
 			await cacheCast.clearCacheByTag('secrets');
-		} catch (err) { }
+		} catch (error) {
+			throw error;
+		}
 		return affects;
 	},
 	delete: async function (id) {
@@ -120,7 +130,9 @@ module.exports = {
 				buildWhere(this, { "id": id })
 			});
 			await cacheCast.clearCacheByTag('secrets');
-		} catch (err) { }
+		} catch (error) {
+			throw error;
+		}
 		return affects;
 	},
 }

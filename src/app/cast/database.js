@@ -2,7 +2,7 @@
  * @Author: trexwb
  * @Date: 2024-01-15 19:58:20
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-13 16:21:28
+ * @LastEditTime: 2024-03-14 10:36:45
  * @FilePath: /laboratory/application/drive/src/app/cast/database.js
  * @Description: 
  * @一花一世界，一叶一如来
@@ -42,10 +42,10 @@ module.exports = {
 		try {
 			if (this.clientWrite) this.clientWrite.destroy();
 			if (this.clientRead) this.clientRead.destroy();
-			this.clientWrite = null;
-			this.clientRead = null;
 		} catch (error) {
-			logCast.writeError(`Error destroying database connections: ${error}`);
+			logCast.writeError(`Error destroying Mysql connections: ${error}`);
 		}
+		this.clientWrite = null;
+		this.clientRead = null;
 	}
 }
