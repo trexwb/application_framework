@@ -2,7 +2,7 @@
  * @Author: trexwb
  * @Date: 2024-01-12 08:45:55
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-11 13:59:37
+ * @LastEditTime: 2024-03-13 17:40:54
  * @FilePath: /laboratory/application/drive/src/app/helper/secrets.js
  * @Description: 
  * @一花一世界，一叶一如来
@@ -14,12 +14,12 @@ const secretsModel = require('@model/secrets');
 function buildWhere(that, where) {
 	that.where('id', '>', 0);
 	function applyWhereCondition(field, value) {
-        if (Array.isArray(value)) {
-            if (value.length > 0) that.whereIn(field, value);
-        } else {
-            that.where(field, value);
-        }
-    }
+		if (Array.isArray(value)) {
+			if (value.length > 0) that.whereIn(field, value);
+		} else {
+			that.where(field, value);
+		}
+	}
 	if (where.id) {
 		applyWhereCondition('id', where.id);
 	}
@@ -47,9 +47,7 @@ module.exports = {
 			row = await cacheCast.get(cacheKey);
 			if (!row?.id) {
 				row = await secretsModel.getRow(function () {
-					buildWhere(this, {
-						"app_id": appId
-					})
+					buildWhere(this, { "app_id": appId })
 				});
 				if (row?.id) {
 					cacheCast.setCacheWithTags('secrets', cacheKey, row)
@@ -77,17 +75,15 @@ module.exports = {
 		} catch (err) { }
 		return rows;
 	},
-	getId: async function (_id) {
-		if (!_id) return {};
+	getId: async function (id) {
+		if (!id) return {};
 		let row = {};
 		try {
-			const cacheKey = `secrets[id:${_id}]`;
+			const cacheKey = `secrets[id:${id}]`;
 			row = await cacheCast.get(cacheKey);
 			if (!row?.id) {
 				row = await secretsModel.getRow(function () {
-					buildWhere(this, {
-						"id": id
-					})
+					buildWhere(this, { "id": id })
 				});
 				if (row?.id) {
 					cacheCast.setCacheWithTags('secrets', cacheKey, row);
@@ -96,36 +92,32 @@ module.exports = {
 		} catch (err) { }
 		return row;
 	},
-	save: async function (_data) {
-		if (!_data) return;
+	save: async function (data) {
+		if (!data) return;
 		let affects = {};
 		try {
-			affects = await secretsModel.save(_data);
+			affects = await secretsModel.save(data);
 			await cacheCast.clearCacheByTag('secrets');
 		} catch (err) { }
 		return affects;
 	},
-	restore: async function (_id) {
-		if (!_id) return;
+	restore: async function (id) {
+		if (!id) return;
 		let affects = {};
 		try {
 			affects = await secretsModel.restore(function () {
-				buildWhere(this, {
-					"id": id
-				})
+				buildWhere(this, { "id": id })
 			});
 			await cacheCast.clearCacheByTag('secrets');
 		} catch (err) { }
 		return affects;
 	},
-	delete: async function (_id) {
-		if (!_id) return;
+	delete: async function (id) {
+		if (!id) return;
 		let affects = {};
 		try {
 			affects = await secretsModel.softDelete(function () {
-				buildWhere(this, {
-					"id": id
-				})
+				buildWhere(this, { "id": id })
 			});
 			await cacheCast.clearCacheByTag('secrets');
 		} catch (err) { }

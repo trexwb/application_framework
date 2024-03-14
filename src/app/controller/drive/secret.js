@@ -2,7 +2,7 @@
  * @Author: trexwb
  * @Date: 2024-02-01 17:20:00
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-08 18:42:55
+ * @LastEditTime: 2024-03-13 16:35:27
  * @FilePath: /laboratory/application/drive/src/app/controller/drive/secret.js
  * @Description: 
  * @一花一世界，一叶一如来
@@ -27,8 +27,7 @@ const getList = async (req, res, next) => {
     const pageSize = req.body.pageSize || 10;
     return await secretsHelper.getList(where, sort, page, pageSize);
   } catch (err) {
-    req.code = 500002001;
-    return;
+    return req.handleError(500002001, err);
   }
 }
 
@@ -37,19 +36,16 @@ const getRow = async (req, res, next) => {
     // req.currentAccount 当登录的账号
     const { id } = req.body;
     if (!id) {
-      req.code = 400002001;
-      return;
+      return req.handleError(400002001);
     }
     const secretRow = await secretsHelper.getId(id || 0);
     if (!secretRow?.id) {
-      req.code = 404002003;
-      return;
+      return req.handleError(404002003);
     }
     delete secretRow.app_secret;
     return secretRow;
   } catch (err) {
-    req.code = 500002002;
-    return;
+    return req.handleError(500002002, err);
   }
 }
 
@@ -59,8 +55,7 @@ const save = async (req, res, next) => {
     if (req.body.id) {
       const secretRow = await secretsHelper.getId(req.body.id);
       if (!secretRow?.id) {
-        req.code = 400002002;
-        return;
+        return req.handleError(400002002);
       }
       data.id = secretRow.id;
     } else {
@@ -78,8 +73,7 @@ const save = async (req, res, next) => {
     }
     return await secretsHelper.save(data);
   } catch (err) {
-    req.code = 500002003;
-    return;
+    return req.handleError(500002003, err);
   }
 }
 
@@ -87,26 +81,22 @@ const update = async (req, res, next) => {
   try {
     const { id, code } = req.body;
     if (!id || !code) {
-      req.code = 400002003;
-      return;
+      return req.handleError(400002003);
     }
     const accountRow = await verifyCode(code, req.currentAccount);
     if (!accountRow) {
-      req.code = 403002001;
-      return;
+      return req.handleError(403002001);
     }
     const secretRow = await secretsHelper.getId(id);
     if (!secretRow?.id) {
-      req.code = 400002004;
-      return;
+      return req.handleError(400002004);
     }
     return await secretsHelper.save({
       id: secretRow.id,
       app_secret: utils.generateRandomString(64)
     });
   } catch (err) {
-    req.code = 500002004;
-    return;
+    return req.handleError(500002004, err);
   }
 }
 
@@ -114,16 +104,14 @@ const enable = async (req, res, next) => {
   try {
     const { id } = req.body
     if (!id) {
-      req.code = 400002005;
-      return;
+      return req.handleError(400002005);
     }
     return await secretsHelper.save({
       id: id || 0,
       status: 1
     });
   } catch (err) {
-    req.code = 500002005;
-    return;
+    return req.handleError(500002005, err);
   }
 }
 
@@ -131,22 +119,19 @@ const disable = async (req, res, next) => {
   try {
     const { id, code } = req.body;
     if (!id || !code) {
-      req.code = 400002006;
-      return;
+      return req.handleError(400002006);
     }
     // 需要认证码进行认证
     const accountRow = await verifyCode(code, req.currentAccount);
     if (!accountRow) {
-      req.code = 403002002;
-      return;
+      return req.handleError(403002002);
     }
     return await secretsHelper.save({
       id: id || 0,
       status: 0
     });
   } catch (err) {
-    req.code = 500002006;
-    return;
+    return req.handleError(500002006, err);
   }
 }
 
@@ -154,21 +139,18 @@ const softDelete = async (req, res, next) => {
   try {
     const { id, code } = req.body;
     if (!id || !code) {
-      req.code = 400002007;
-      return;
+      return req.handleError(400002007);
     }
     // 需要认证码进行认证
     const accountRow = await verifyCode(code, req.currentAccount);
     if (!accountRow) {
-      req.code = 403002003;
-      return;
+      return req.handleError(403002003);
     }
     return await secretsHelper.delete({
       id: id || 0
     });
   } catch (err) {
-    req.code = 500002007;
-    return;
+    return req.handleError(500002007, err);
   }
 }
 

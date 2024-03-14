@@ -59,13 +59,11 @@ module.exports = {
 		}
 		this.serverRow = await serversHelper.getKey('account');
 		if (!this.serverRow?.id) {
-			req.code = 500020001;
-			return;
+			return req.handleError(500020001);
 		}
 		await this.setClient();
 		if (!this.proxy) {
-			req.code = 500020002;
-			return;
+			return req.handleError(500020002);
 		}
 		return this.proxy;
 	},
@@ -75,9 +73,7 @@ module.exports = {
 		}
 		if (result && result.error) {
 			if (req, next) {
-				req.code = 500020002;
-				req.msg = result.error;
-				return;
+				return req.handleError(500020003);
 			}
 		}
 		return result;

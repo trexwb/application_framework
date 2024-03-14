@@ -2,7 +2,7 @@
  * @Author: trexwb
  * @Date: 2024-01-12 08:45:55
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-11 14:11:05
+ * @LastEditTime: 2024-03-13 18:52:24
  * @FilePath: /laboratory/application/drive/src/app/model/secretsLogs.js
  * @Description: 
  * @一花一世界，一叶一如来
@@ -10,6 +10,7 @@
  */
 const databaseCast = require('@cast/database');
 const utils = require('@utils/index');
+const logCast = require('@cast/log');
 const moment = require('moment-timezone');
 
 module.exports = {
@@ -51,23 +52,31 @@ module.exports = {
 					return false;
 				});
 		} catch (err) {
+			logCast.writeError(
+				err.toString(),
+				await dbRead.select([...new Set([...this.$guarded, ...this.$fillable, ...this.$hidden])])
+					.from(this.$table)
+					.where(where)
+					.first()
+					.toString()
+			);
 			return false;
 		}
 	},
-	save: async function (_data) {
-		if (!_data) return;
+	save: async function (data) {
+		if (!data) return;
 		const dbWrite = databaseCast.dbWrite();
 		const keysArray = [...this.$fillable, ...this.$guarded, ...this.$hidden]; // 这是你的键数组
 		const dataRow = keysArray.reduce((result, key) => {
-			if (_data.hasOwnProperty(key)) {
+			if (data.hasOwnProperty(key)) {
 				if (this.$casts[key] === 'json') {
-					result[key] = JSON.stringify(_data[key]);
+					result[key] = JSON.stringify(data[key]);
 				} else if (this.$casts[key] === 'integer') {
-					result[key] = Number(_data[key]);
+					result[key] = Number(data[key]);
 				} else if (this.$casts[key] === 'datetime') {
-					result[key] = _data[key] ? utils.dateFormatter(_data[key], 'Y-m-d H:i:s', 1, false) : null;
+					result[key] = data[key] ? utils.dateFormatter(data[key], 'Y-m-d H:i:s', 1, false) : null;
 				} else {
-					result[key] = _data[key];
+					result[key] = data[key];
 				}
 			}
 			return result;
@@ -100,6 +109,10 @@ module.exports = {
 					}
 				});
 			} catch (err) {
+				logCast.writeError(
+					err.toString(),
+					dataRow
+				);
 				return false;
 			}
 		}

@@ -2,7 +2,7 @@
  * @Author: trexwb
  * @Date: 2024-01-10 08:57:26
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-11 14:11:00
+ * @LastEditTime: 2024-03-13 18:31:48
  * @FilePath: /laboratory/application/drive/src/app/model/secrets.js
  * @Description: 
  * @一花一世界，一叶一如来
@@ -10,6 +10,7 @@
  */
 const databaseCast = require('@cast/database');
 const utils = require('@utils/index');
+const logCast = require('@cast/log');
 const moment = require('moment-timezone');
 
 module.exports = {
@@ -60,6 +61,15 @@ module.exports = {
 					return false;
 				});
 		} catch (err) {
+			logCast.writeError(
+				err.toString(),
+				await dbRead.select([...new Set([...this.$guarded, ...this.$fillable, ...this.$hidden])])
+					.from(this.$table)
+					.where(where)
+					.whereNull('deleted_at')
+					.first()
+					.toString()
+			);
 			return false;
 		}
 	},
@@ -80,6 +90,15 @@ module.exports = {
 					return false;
 				});
 		} catch (err) {
+			logCast.writeError(
+				err.toString(),
+				await dbRead.select([...new Set([...this.$guarded, ...this.$fillable, ...this.$hidden])])
+					.from(this.$table)
+					.where(where)
+					.whereNotNull('deleted_at')
+					.first()
+					.toString()
+			);
 			return false;
 		}
 	},
@@ -116,6 +135,18 @@ module.exports = {
 				return { total: 0, list: [] };
 			}
 		} catch (err) {
+			logCast.writeError(
+				err.toString(),
+				await dbRead.select([...new Set([...this.$guarded, ...this.$fillable])])
+					.from(this.$table)
+					.where(where)
+					.whereNull('deleted_at')
+					// .orderByRaw('if(`sort`>0,1,0) DESC,sort ASC').orderBy([{ column: 'sort', order: 'ASC' }]) // 有排序sort字段时使用
+					.orderBy(order)
+					.limit(limit || 10)
+					.offset(offset || 0)
+					.toString()
+			);
 			return { total: 0, list: [] };
 		}
 	},
@@ -152,23 +183,35 @@ module.exports = {
 				return { total: 0, list: [] };
 			}
 		} catch (err) {
+			logCast.writeError(
+				err.toString(),
+				await dbRead.select([...new Set([...this.$guarded, ...this.$fillable])])
+					.from(this.$table)
+					.where(where)
+					.whereNotNull('deleted_at')
+					// .orderByRaw('if(`sort`>0,1,0) DESC').orderBy([{ column: 'sort', order: 'ASC' }]) // 有排序sort字段时使用
+					.orderBy(order)
+					.limit(limit || 10)
+					.offset(offset || 0)
+					.toString()
+			);
 			return { total: 0, list: [] };
 		}
 	},
-	save: async function (_data) {
-		if (!_data) return;
+	save: async function (data) {
+		if (!data) return;
 		const dbWrite = databaseCast.dbWrite();
 		const keysArray = [...this.$fillable, ...this.$guarded, ...this.$hidden]; // 这是你的键数组
 		const dataRow = keysArray.reduce((result, key) => {
-			if (_data.hasOwnProperty(key)) {
+			if (data.hasOwnProperty(key)) {
 				if (this.$casts[key] === 'json') {
-					result[key] = JSON.stringify(_data[key]);
+					result[key] = JSON.stringify(data[key]);
 				} else if (this.$casts[key] === 'integer') {
-					result[key] = Number(_data[key]);
+					result[key] = Number(data[key]);
 				} else if (this.$casts[key] === 'datetime') {
-					result[key] = _data[key] ? utils.dateFormatter(_data[key], 'Y-m-d H:i:s', 1, false) : null;
+					result[key] = data[key] ? utils.dateFormatter(data[key], 'Y-m-d H:i:s', 1, false) : null;
 				} else {
-					result[key] = _data[key];
+					result[key] = data[key];
 				}
 			}
 			return result;
@@ -201,6 +244,11 @@ module.exports = {
 					}
 				});
 			} catch (err) {
+				logCast.writeError(
+					err.toString(),
+					data
+
+				);
 				return false;
 			}
 		}
@@ -215,6 +263,15 @@ module.exports = {
 					deleted_at: null
 				});
 		} catch (err) {
+			logCast.writeError(
+				err.toString(),
+				await dbWrite(this.$table)
+					.where(where)
+					.update({
+						deleted_at: null
+					})
+					.toString()
+			);
 			return false;
 		}
 	},
@@ -228,6 +285,15 @@ module.exports = {
 					deleted_at: dbWrite.fn.now()
 				});
 		} catch (err) {
+			logCast.writeError(
+				err.toString(),
+				await dbWrite(this.$table)
+					.where(where)
+					.update({
+						deleted_at: dbWrite.fn.now()
+					})
+					.toString()
+			);
 			return false;
 		}
 	}

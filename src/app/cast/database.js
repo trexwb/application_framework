@@ -2,7 +2,7 @@
  * @Author: trexwb
  * @Date: 2024-01-15 19:58:20
  * @LastEditors: trexwb
- * @LastEditTime: 2024-02-21 14:45:49
+ * @LastEditTime: 2024-03-13 16:21:28
  * @FilePath: /laboratory/application/drive/src/app/cast/database.js
  * @Description: 
  * @一花一世界，一叶一如来
@@ -12,6 +12,7 @@
 // console.log(process.env.NODE_ENV, process.env);
 const knex = require('knex');
 const knexConfig = require('@config/knex');
+const logCast = require('@cast/log');
 
 // const dbRead = knex(knexConfig.read);
 // const dbWrite = knex(knexConfig.write);
@@ -20,34 +21,31 @@ module.exports = {
 	clientWrite: null,
 	clientRead: null,
 	prefix: process.env.DB_PREFIX || '',
-	dbWrite: function() {
-		if (this.clientWrite) {
-			if (!this.clientWrite.context || !this.clientWrite.context?.client || !this.clientWrite.context?.client?.pool || this.clientWrite.context?.client?.pool === undefined) {
-				this.destroy(); // 链接池不存在就销毁
-			}else{
-				return this.clientWrite;
-			}
+	// 检查并销毁无效的连接池
+	destroyIfInvalid: function (client) {
+		if (client?.context?.client?.pool) {
+			return client;
+		} else {
+			this.destroy();
+			return false;
 		}
-		this.clientWrite = knex(knexConfig.write);
+	},
+	dbWrite: function () {
+		this.clientWrite = this.destroyIfInvalid(this.clientWrite) || knex(knexConfig.write);
 		return this.clientWrite;
 	},
-	dbRead: function() {
-		if (this.clientRead) {
-			if (!this.clientRead.context || !this.clientRead.context?.client || !this.clientRead.context?.client?.pool || this.clientRead.context?.client?.pool === undefined) {
-				this.destroy(); // 链接池不存在就销毁
-			}else{
-				return this.clientRead;
-			}
-		}
-		this.clientRead = knex(knexConfig.read);
+	dbRead: function () {
+		this.clientRead = this.destroyIfInvalid(this.clientRead) || knex(knexConfig.read);
 		return this.clientRead;
 	},
-	destroy: function() {
+	destroy: function () {
 		try {
-			this.clientWrite && this.clientWrite.destroy();
-			this.clientRead && this.clientRead.destroy();
+			if (this.clientWrite) this.clientWrite.destroy();
+			if (this.clientRead) this.clientRead.destroy();
 			this.clientWrite = null;
 			this.clientRead = null;
-		} catch (err) { }
+		} catch (error) {
+			logCast.writeError(`Error destroying database connections: ${error}`);
+		}
 	}
 }
