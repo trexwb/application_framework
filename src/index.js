@@ -2,7 +2,7 @@
  * @Author: trexwb
  * @Date: 2024-01-09 08:52:32
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-13 18:10:50
+ * @LastEditTime: 2024-03-14 10:17:50
  * @FilePath: /laboratory/application/drive/src/index.js
  * @Description: 
  * @一花一世界，一叶一如来
@@ -48,24 +48,30 @@ function initApp() {
             // console.error('发生错误:', errorStr);
         }
         next();
-        // res.setHeader('Access-Control-Allow-Origin', '*'); // 允许所有源访问，可以根据需求设置具体的源
-        // res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE'); // 允许的HTTP请求方法
-        // res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, App-Id, App-Secret, Site-Id, Auth-Token, Cache-Time'); // 允许的头部字段
-        // req.method === 'OPTIONS' ? res.sendStatus(200) : next();
     });
 
     app.get('/', function (req, res) {
         res.status(200).sendFile(alias.resolve('@resources/view/index.html'));
     });
 
-    const routeMiddleware = require('@middleware/route');
-    routeMiddleware.notify(app); // 通知
+    // 通知类路由
+    const notifyRouter = express.Router();
+    notifyRouter.post('/:fn', async function (req, res, next) {
+        const { fn } = req.params;
+        if (fn === 'attachment') {
+            const signController = require('@controller/attachment/notify');
+            await signController.notify(req, res, next)
+        }
+        res.status(200).send('Success');
+    });
+	app.use(`/notify`,notifyRouter)
 
     const verifyMiddleware = require('@middleware/verify');
     // app.use(verifyMiddleware.sanitizeInput); // 安全过滤
     app.use(verifyMiddleware.token); // appid校验
     app.use(verifyMiddleware.sign); // 安全传输加密
 
+    const routeMiddleware = require('@middleware/route');
     routeMiddleware.controller(app);
     // app.use(routeMiddleware.controller);
 
