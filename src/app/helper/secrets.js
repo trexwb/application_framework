@@ -2,7 +2,7 @@
  * @Author: trexwb
  * @Date: 2024-01-12 08:45:55
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-14 09:50:59
+ * @LastEditTime: 2024-03-18 11:56:57
  * @FilePath: /laboratory/application/drive/src/app/helper/secrets.js
  * @Description: 
  * @一花一世界，一叶一如来
@@ -38,7 +38,7 @@ function buildWhere(that, where) {
 	}
 }
 
-module.exports = {
+const secretsHelper = {
 	getAppId: async function (appId) {
 		if (!appId) return;
 		let row = {};
@@ -50,7 +50,7 @@ module.exports = {
 					buildWhere(this, { "app_id": appId })
 				});
 				if (row?.id) {
-					cacheCast.setCacheWithTags('secrets', cacheKey, row)
+					await cacheCast.setCacheWithTags('secrets', cacheKey, row)
 				}
 			}
 		} catch (error) {
@@ -71,7 +71,7 @@ module.exports = {
 					buildWhere(this, where)
 				}, order, pageSize, offset);
 				if (rows?.total) {
-					cacheCast.setCacheWithTags('secrets', cacheKey, rows);
+					await cacheCast.setCacheWithTags('secrets', cacheKey, rows);
 				}
 			}
 		} catch (error) {
@@ -90,7 +90,7 @@ module.exports = {
 					buildWhere(this, { "id": id })
 				});
 				if (row?.id) {
-					cacheCast.setCacheWithTags('secrets', cacheKey, row);
+					await cacheCast.setCacheWithTags('secrets', cacheKey, row);
 				}
 			}
 		} catch (error) {
@@ -136,3 +136,5 @@ module.exports = {
 		return affects;
 	},
 }
+
+module.exports = secretsHelper;
