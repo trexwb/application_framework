@@ -2,8 +2,8 @@
  * @Author: trexwb
  * @Date: 2024-01-10 08:57:26
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-08 09:46:33
- * @FilePath: /laboratory/application/drive/src/app/middleware/verify.js
+ * @LastEditTime: 2024-03-26 17:48:03
+ * @FilePath: /laboratory/Users/wbtrex/website/localServer/node/damei/package/node/application_framework/src/app/middleware/verify.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
@@ -70,16 +70,23 @@ const token = async (req, res, next) => {
 	}
 	if (!req.siteId) {
 		const sitesHelper = require('@helper/sites');
-		const sitesRow = await sitesHelper.getHostname(req.headers['host'] || '');
-		if (sitesRow.id) {
-			req.siteId = sitesRow.site_id || sitesRow.id;
+		const parsedUrl = (req.body.hostname || req.headers['origin']).toString();
+		const sitesRow = await sitesHelper.getHostname((parsedUrl || '').replace('https://','').replace('http://',''));
+		if (sitesRow?.id) {
+			req.siteId = sitesRow?.site_id || sitesRow?.id;
 		} else {
-			req.siteId = secretRow.extension?.siteId;
+			req.siteId = secretRow?.extension?.siteId;
 		}
 	}
-	if (req.siteId != secretRow.extension?.siteId && !secretRow.permissions?.includes('admin')) {
+	if (req.siteId != secretRow?.extension?.siteId && !secretRow?.permissions?.includes('admin')) {
 		return status.set(res).dictionary(401000005).response();
 	}
+	if ('undefined' === typeof siteId) {
+		global.siteId = req.siteId
+	} else {
+		siteId = req.siteId
+	}
+	process.env.SITE_ID = siteId;
 	req.secretRow = secretRow;
 	return next();
 };
@@ -93,6 +100,24 @@ const sign = async (req, res, next) => {
 		req.body = { ...decryptedData }; //Object.assign({}, decryptedData);
 	}
 	return next();
+};
+
+// 通用的处理函数
+const processAccountOperation = async (operation, siteId) => {
+	const accountService = require('@service/account');
+	try {
+		const accountClient = await accountService.connectionService(siteId);
+		if (!accountClient) {
+			throw new Error('Service Error');
+		}
+		const result = await operation(accountClient);
+		if (result?.error) {
+			throw new Error(result.error);
+		}
+		return await accountService.decryptData(result);
+	} catch (error) {
+		throw new Error(error);
+	}
 };
 
 const manageAuth = async (req, res, next) => {
@@ -129,15 +154,9 @@ const consoleAuth = async (req, res, next) => {
 	if (!decryptedData.timeStamp || decryptedData.timeStamp < Math.floor(Date.now() / 1000) - Number(process.env.TOKEN_TIME)) {
 		return status.set(res).dictionary(401000011).response();
 	}
-	const accountService = require('@service/account');
-	const accountClient = await accountService.connectionService(req, next);
-	if (!accountClient) {
-		return status.set(res).dictionary(401000012).response();
-	}
-	let result = await accountClient.verifyToken(decryptedData.token);
-	if (result && result.iv) {
-		result = await accountService.decryptData(result);
-	}
+	const result = await processAccountOperation(async (client) => {
+		return await client.verifyToken(decryptedData.token);
+	}, req.siteId || siteId);
 	if (!result || result.error) {
 		return status.set(res).dictionary(401000013).response();
 	}
@@ -162,15 +181,9 @@ const frontAuth = async (req, res, next) => {
 	if (!decryptedData.timeStamp || decryptedData.timeStamp < Math.floor(Date.now() / 1000) - Number(process.env.TOKEN_TIME)) {
 		return status.set(res).dictionary(401000017).response();
 	}
-	const accountService = require('@service/account');
-	const accountClient = await accountService.connectionService(req, next);
-	if (!accountClient) {
-		return status.set(res).dictionary(401000018).response();
-	}
-	let result = await accountClient.verifyToken(decryptedData.token);
-	if (result && result.iv) {
-		result = await accountService.decryptData(result);
-	}
+	const result = await processAccountOperation(async (client) => {
+		return await client.verifyToken(decryptedData.token);
+	}, req.siteId || siteId);
 	if (!result || result.error) {
 		return status.set(res).dictionary(401000019).response(result.error);
 	}

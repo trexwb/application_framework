@@ -2,8 +2,8 @@
  * @Author: trexwb
  * @Date: 2024-01-04 14:28:29
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-07 14:48:43
- * @FilePath: /laboratory/application/drive/src/utils/status.js
+ * @LastEditTime: 2024-04-09 16:06:21
+ * @FilePath: /laboratory/Users/wbtrex/website/localServer/node/damei/package/node/application_framework/src/utils/status.js
  * @Description: 
  * @一花一世界，一叶一如来
  * Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
@@ -22,61 +22,61 @@
 // 404 Not Found: 请求的资源无法找到。
 // 500 Internal Server Error: 服务器内部错误，无法完成请求。
 const status = {
-    res: null,
-    stream: {},
-    msgMap: {
-        200: 'Success',
-        201: 'Created',
-        204: 'No Content',
-        304: 'Not Modified',
-        400: 'Bad Request',
-        401: 'Unauthorized',
-        403: 'Forbidden',
-        404: 'Not Found',
-        500: 'Internal Server Error',
-    },
-    set(res) {
-        status.res = res;
-        return status;
-    },
-    dictionary(code) {
-        status.stream = {
-            msg: status.msgMap[code] || 'unknown error',
-            code: code
-        }
-        return status;
-    },
-    parsing() {
-        return Number((status.stream.code || 0).toString().substring(0, 3) || 200);
-    },
-    async response(data) {
-        if (data) {
-            status.stream.data = JSON.parse(JSON.stringify(data));
-            if (status.stream.data.length <= 0) {
-                delete status.stream.data;
-            }
-        }
-        if (status.res) {
-            try {
-                // 输出前关闭数据库
-                const cacheCast = require('@cast/cache');
-                await cacheCast.destroy();
-            } catch (e) { }
-            try {
-                // 输出前关闭数据库
-                const databaseCast = require('@cast/database');
-                await databaseCast.destroy();
-            } catch (e) { }
-            return status.res.status(status.parsing()).send(status.stream);
-        }
-        return status;
+  res: null,
+  stream: {},
+  msgMap: {
+    200: 'Success',
+    201: 'Created',
+    204: 'No Content',
+    304: 'Not Modified',
+    400: 'Bad Request',
+    401: 'Unauthorized',
+    403: 'Forbidden',
+    404: 'Not Found',
+    500: 'Internal Server Error',
+  },
+  set(res) {
+    status.res = res;
+    return status;
+  },
+  dictionary(code) {
+    status.stream = {
+      msg: status.msgMap[code] || 'unknown error',
+      code: code
     }
+    return status;
+  },
+  parsing() {
+    return Number((status.stream.code || 0).toString().substring(0, 3) || 200);
+  },
+  async response(data) {
+    if (data) {
+      status.stream.data = JSON.parse(JSON.stringify(data));
+      if (status.stream.data.length <= 0) {
+        delete status.stream.data;
+      }
+    }
+    if (status.res) {
+      try {
+        // 输出前关闭数据库
+        const cacheCast = require('@cast/cache');
+        await cacheCast.destroy();
+      } catch (e) { }
+      try {
+        // 输出前关闭数据库
+        const databaseCast = require('@cast/database');
+        await databaseCast.destroy();
+      } catch (e) { }
+      return status.res.status(status.parsing()).send(status.stream);
+    }
+    return status;
+  }
 }
 
 module.exports = {
-    msgMap: status.msgMap,
-    set: status.set,
-    dictionary: status.dictionary,
-    parsing: status.parsing,
-    response: status.response
+  msgMap: status.msgMap,
+  set: status.set,
+  dictionary: status.dictionary,
+  parsing: status.parsing,
+  response: status.response
 };

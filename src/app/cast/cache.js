@@ -2,8 +2,8 @@
  * @Author: trexwb
  * @Date: 2024-01-09 08:52:32
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-14 10:50:28
- * @FilePath: /laboratory/application/drive/src/app/cast/cache.js
+ * @LastEditTime: 2024-03-23 10:41:18
+ * @FilePath: /laboratory/Users/wbtrex/website/localServer/node/damei/package/node/application_framework/src/app/cast/cache.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
@@ -26,16 +26,12 @@ module.exports = {
             host: redisConfig.host || '',
             port: redisConfig.port || '',
           },
-          database: redisConfig.db || 1,
-        });
-        await this.client.connect();
-        this.client.on('close', function () {
+          database: redisConfig.db || 0,
+        }).on('error', () => {
           this.client = null;
-        });
+        }).connect();
       } catch (error) {
         logCast.writeError(`Error initializing Redis client: ${error}`);
-        // 重新抛出异常，以便调用者可以捕获并进行进一步处理
-        throw error;
       }
     }
     return this.client;
@@ -57,7 +53,7 @@ module.exports = {
     await this.create();
     try {
       const value = await this.client.get(redisConfig.prefix + key);
-      return value ? JSON.parse(value) : null; // 处理未找到键值的场景，返回null而不是false
+      return value ? JSON.parse(value) : false; // 处理未找到键值的场景，返回null而不是false
     } catch (error) {
       logCast.writeError(`Error getting Redis value: ${error}`);
       return false;
@@ -82,7 +78,7 @@ module.exports = {
         this.client.set(redisConfig.prefix + key, JSON.stringify(value))
       ]);
     } catch (error) {
-      logCast.writeError(`Error setting cache with tags: ${error}`);
+      logCast.writeError(`Error setting cache with tags: ${redisConfig.prefix + key},${error}`);
     }
   },
 
@@ -100,13 +96,14 @@ module.exports = {
   },
 
   destroy: async function () {
-    if (this.client) {
-      try {
-        await this.client.quit();
-      } catch (error) {
-        logCast.writeError(`Error destroying Redis client: ${error}`);
-      }
-    }
+    // if (this.client) {
+    //   try {
+    //     await this.client.disconnect();
+    //     // await this.client.quit();
+    //   } catch (error) {
+    //     logCast.writeError(`Error destroying Redis client: ${error}`);
+    //   }
+    // }
     this.client = null;
   }
 };

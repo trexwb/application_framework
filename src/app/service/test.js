@@ -2,8 +2,8 @@
  * @Author: trexwb
  * @Date: 2024-01-17 13:50:21
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-14 09:29:11
- * @FilePath: /laboratory/application/drive/src/app/service/account.js
+ * @LastEditTime: 2024-03-14 15:34:38
+ * @FilePath: /print/Users/wbtrex/website/localServer/node/damei/package/node/application_framework/src/app/service/test.js
  * @Description: 
  * @一花一世界，一叶一如来
  * Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
@@ -52,7 +52,7 @@ module.exports = {
 		if (req.siteId) {
 			this.setSiteId(req.siteId)
 		}
-		this.serverRow = await serversHelper.getKey('微服务的名称');
+		this.serverRow = await serversHelper.getKey('服务名称');
 		if (!this.serverRow?.id) {
 			return req.handleError(500019001);
 		}

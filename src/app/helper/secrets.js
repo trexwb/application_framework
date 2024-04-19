@@ -2,12 +2,13 @@
  * @Author: trexwb
  * @Date: 2024-01-12 08:45:55
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-18 11:56:57
- * @FilePath: /laboratory/application/drive/src/app/helper/secrets.js
+ * @LastEditTime: 2024-04-03 19:42:20
+ * @FilePath: /laboratory/Users/wbtrex/website/localServer/node/damei/package/node/application_framework/src/app/helper/secrets.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
  */
+const utils = require('@utils/index');
 const cacheCast = require('@cast/cache');
 const secretsModel = require('@model/secrets');
 
@@ -43,7 +44,7 @@ const secretsHelper = {
 		if (!appId) return;
 		let row = {};
 		try {
-			const cacheKey = `secrets[appid:${appId}]`;
+			const cacheKey = `secrets:[appid:${appId}]`;
 			row = await cacheCast.get(cacheKey);
 			if (!row?.id) {
 				row = await secretsModel.getRow(function () {
@@ -61,10 +62,12 @@ const secretsHelper = {
 	getList: async function (where, order, _page, _pageSize) { // await secretsHelper.getList({keywords: '1',status: '0'});
 		let rows = {};
 		try {
-			const page = Number(_page ?? 1);
-			const pageSize = Number(_pageSize ?? 10);
-			const offset = Number(!page ? 0 : pageSize * (page - 1));
-			const cacheKey = `secrets[list:${JSON.stringify(where)},${JSON.stringify(order)},${page},${pageSize}]`;
+			const sortWhere = utils.sortMultiDimensionalObject(where);
+      const sortOrder = utils.sortMultiDimensionalObject(order);
+			const page = utils.safeCastToInteger(_page ?? 1);
+			const pageSize = utils.safeCastToInteger(_pageSize ?? 10);
+			const offset = utils.safeCastToInteger(!page ? 0 : pageSize * (page - 1));
+			const cacheKey = `secrets:[list:${JSON.stringify([sortWhere, sortOrder, page, pageSize])}]`;
 			rows = await cacheCast.get(cacheKey);
 			if (!rows?.total) {
 				rows = await secretsModel.getList(function () {
@@ -83,7 +86,7 @@ const secretsHelper = {
 		if (!id) return {};
 		let row = {};
 		try {
-			const cacheKey = `secrets[id:${id}]`;
+			const cacheKey = `secrets:[id:${id}]`;
 			row = await cacheCast.get(cacheKey);
 			if (!row?.id) {
 				row = await secretsModel.getRow(function () {
