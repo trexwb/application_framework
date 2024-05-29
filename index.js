@@ -2,7 +2,7 @@
  * @Author: trexwb
  * @Date: 2024-01-09 08:52:32
  * @LastEditors: trexwb
- * @LastEditTime: 2024-05-14 16:39:49
+ * @LastEditTime: 2024-05-29 14:00:49
  * @FilePath: /conf/Users/wbtrex/website/localServer/node/trexwb/git/application_framework/index.js
  * @Description: 
  * @一花一世界，一叶一如来
@@ -109,6 +109,10 @@ if (process.env.MULTIPLE_PROCESSES === "true") {
 // 计划任务
 const schedule = require('@root/src/schedule/task');
 schedule.handler();
+
+// 消息消费
+const queue = require('@job/queue');
+queue.handler();
 
 exports.handler = async function(event, context) {
   // console.log("event: \n" + event);
