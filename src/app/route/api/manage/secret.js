@@ -2,12 +2,13 @@
  * @Author: trexwb
  * @Date: 2024-01-10 08:57:26
  * @LastEditors: trexwb
- * @LastEditTime: 2024-03-08 09:57:34
+ * @LastEditTime: 2024-05-11 21:13:00
  * @FilePath: /laboratory/application/drive/src/app/route/manage/secret.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
  */
+'use strict';
 
 const express = require('express');
 const router = express.Router();

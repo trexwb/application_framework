@@ -8,6 +8,7 @@
  * 一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
  */
+'use strict';
 const crypto = require('crypto');
 const md5 = (str) => {
 	const md5 = crypto.createHash('md5');
@@ -23,7 +24,7 @@ const encrypt = (encryptedData, key, iv) => {
 		let encrypted = cipher.update(encryptedText, 'utf8', 'hex');
 		encrypted += cipher.final('hex');
 		return encrypted;
-	} catch (err) {
+	} catch (error) {
 		return false;
 	}
 }
@@ -34,7 +35,7 @@ const decrypt = (encryptedText, key, iv) => {
 		let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
 		decrypted += decipher.final('utf8');
 		return JSON.parse(decrypted);
-	} catch (err) {
+	} catch (error) {
 		return false;
 	}
 }

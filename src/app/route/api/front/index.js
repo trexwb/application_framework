@@ -1,13 +1,14 @@
-/*
+/*** 
  * @Author: trexwb
- * @Date: 2023-12-16 09:52:40
+ * @Date: 2024-01-17 13:42:20
  * @LastEditors: trexwb
- * @LastEditTime: 2023-12-29 16:27:21
- * @FilePath: \applications\drive\src\app\controller\v1\manages.js
- * @Description: In User Settings Edit
- * 一花一世界，一叶一如来
- * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
+ * @LastEditTime: 2024-05-11 21:12:35
+ * @FilePath: /laboratory/application/drive/src/app/route/front/index.js
+ * @Description: 
+ * @一花一世界，一叶一如来
+ * Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
  */
+'use strict';
 // const alias = require('@utils/alias');
 
 const express = require('express');
@@ -20,7 +21,7 @@ router.get('/', (req, res, next) => {
 
 // 处理 POST 请求
 router.post('/', (req, res, next) => {
-  req.data = {};
+  req.data = null;
   return next();
 });
 

@@ -1,24 +1,58 @@
 {
   "compilerOptions": {
-      "baseUrl": ".",
-      "paths": {
-          "@root/*": ["./*"],
-          "@src/*": ["src/*"],
-          "@app/*": ["src/app/*"],
-          "@cast/*": ["src/app/cast/*"],
-          "@controller/*": ["src/app/controller/*"],
-          "@route/*": ["src/app/route/*"],
-          "@helper/*": ["src/app/helper/*"],
-          "@middleware/*": ["src/app/middleware/*"],
-          "@model/*": ["src/app/model/*"],
-          "@service/*": ["src/app/service/*"],
-          "@config/*": ["src/config/*"],
-          "@logger/*": ["src/logger/*"],
-          "@job/*": ["src/job/*"],
-          "@resources/*": ["src/resources/*"],
-          "@schedule/*": ["src/schedule/*"],
-          "@utils/*": ["src/utils/*"],
-          "@static/*": ["src/static/*"],
-      }
+    "baseUrl": ".",
+    "paths": {
+      "@root/*": [
+        "./*"
+      ],
+      "@src/*": [
+        "./src/*"
+      ],
+      "@app/*": [
+        "./src/app/*"
+      ],
+      "@cast/*": [
+        "./src/app/cast/*"
+      ],
+      "@controller/*": [
+        "./src/app/controller/*"
+      ],
+      "@route/*": [
+        "./src/app/route/*"
+      ],
+      "@helper/*": [
+        "./src/app/helper/*"
+      ],
+      "@middleware/*": [
+        "./src/app/middleware/*"
+      ],
+      "@model/*": [
+        "./src/app/model/*"
+      ],
+      "@service/*": [
+        "./src/app/service/*"
+      ],
+      "@config/*": [
+        "./src/config/*"
+      ],
+      "@evevnt/*": [
+        "./src/evevnt/*"
+      ],
+      "@job/*": [
+        "./src/job/*"
+      ],
+      "@resources/*": [
+        "./src/resources/*"
+      ],
+      "@schedule/*": [
+        "./src/schedule/*"
+      ],
+      "@utils/*": [
+        "./src/utils/*"
+      ],
+      "@static/*": [
+        "./src/static/*"
+      ],
+    }
   }
 }

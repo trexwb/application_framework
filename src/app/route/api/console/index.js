@@ -1,14 +1,14 @@
-/*** 
+/*
  * @Author: trexwb
- * @Date: 2024-01-04 14:28:29
+ * @Date: 2023-12-16 09:52:40
  * @LastEditors: trexwb
- * @LastEditTime: 2024-02-22 13:41:20
- * @FilePath: /laboratory/application/drive/src/app/route/manage/index.js
- * @Description: 
- * @一花一世界，一叶一如来
- * Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
+ * @LastEditTime: 2023-12-29 16:27:21
+ * @FilePath: \applications\drive\src\app\controller\v1\manages.js
+ * @Description: In User Settings Edit
+ * 一花一世界，一叶一如来
+ * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
  */
-
+'use strict';
 // const alias = require('@utils/alias');
 
 const express = require('express');

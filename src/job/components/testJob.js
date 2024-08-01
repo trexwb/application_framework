@@ -2,7 +2,7 @@
  * @Author: trexwb
  * @Date: 2024-05-14 09:55:15
  * @LastEditors: trexwb
- * @LastEditTime: 2024-05-29 13:47:28
+ * @LastEditTime: 2024-06-13 10:36:46
  * @FilePath: /laboratory/application/drive/src/job/components/testJob.js
  * @Description: 
  * @一花一世界，一叶一如来
@@ -15,7 +15,7 @@ const redisConfig = {
   host: process.env.QUEUE_HOST || '127.0.0.1',
   port: process.env.QUEUE_PORT || 6379,
   password: process.env.QUEUE_PASSWORD || '',
-  db: Number(process.env.QUEUE_DB || 0)
+  database: Number(process.env.QUEUE_DB || 0)
 };
 
 class RedisManager {
@@ -32,7 +32,7 @@ class RedisManager {
             host: redisConfig.host || '',
             port: redisConfig.port || '',
           },
-          database: redisConfig.db || 0,
+          database: redisConfig.database || 0,
         });
         client.on('error', (error) => {
           console.error('Redis client error:', error);
@@ -65,7 +65,10 @@ class RedisManager {
         const reply = await client.blPop('testQueue', 0);
         if (reply) {
           console.log('go...', JSON.parse(reply.element || false));
-          this.consumeMessage();
+          // this.consumeMessage();
+        } else {
+          // 如果没有消息，则等待，避免快速重复调用blPop增加负载
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
       } catch (error) {
         console.error(`Error consuming message:`, error);

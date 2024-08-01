@@ -2,12 +2,13 @@
  * @Author: trexwb
  * @Date: 2024-01-04 14:28:29
  * @LastEditors: trexwb
- * @LastEditTime: 2024-04-09 16:06:21
- * @FilePath: /laboratory/Users/wbtrex/website/localServer/node/damei/package/node/application_framework/src/utils/status.js
+ * @LastEditTime: 2024-06-24 11:05:51
+ * @FilePath: /drive/src/utils/status.js
  * @Description: 
  * @一花一世界，一叶一如来
  * Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
  */
+'use strict';
 
 // const cacheCast = require('@cast/cache');
 // const databaseCast = require('@cast/database');
@@ -21,6 +22,7 @@
 // 403 Forbidden: 服务器理解请求客户端的请求，但是拒绝执行此请求。
 // 404 Not Found: 请求的资源无法找到。
 // 500 Internal Server Error: 服务器内部错误，无法完成请求。
+// 返回码组成：状态码（3位数）+ 路由码|中间件（3位数，000表示中间件）+ 程序码（3位数定位程序问题） 如，状态码401，路由码004，程序码004，结果401004004
 const status = {
   res: null,
   stream: {},
@@ -51,25 +53,24 @@ const status = {
   },
   async response(data) {
     if (data) {
-      status.stream.data = JSON.parse(JSON.stringify(data));
-      if (status.stream.data.length <= 0) {
-        delete status.stream.data;
+      if (Array.isArray(data) && data.length === 0) {
+        status.stream.data = null;
+      } else {
+        status.stream.data = JSON.parse(JSON.stringify(data));
       }
+      // if (status.stream.data.length <= 0) {
+      //   delete status.stream.data;
+      // }
     }
     if (status.res) {
-      try {
-        // 输出前关闭数据库
-        const cacheCast = require('@cast/cache');
-        await cacheCast.destroy();
-      } catch (e) { }
-      try {
-        // 输出前关闭数据库
-        const databaseCast = require('@cast/database');
-        await databaseCast.destroy();
-      } catch (e) { }
+      // // 输出前关闭数据库
+      // const cacheCast = require('@cast/cache');
+      // cacheCast.destroy();
+      // // 输出前关闭数据库
+      // const databaseCast = require('@cast/database');
+      // databaseCast.destroy();
       return status.res.status(status.parsing()).send(status.stream);
     }
-    return status;
   }
 }
 

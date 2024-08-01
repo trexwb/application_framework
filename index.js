@@ -2,8 +2,8 @@
  * @Author: trexwb
  * @Date: 2024-01-09 08:52:32
  * @LastEditors: trexwb
- * @LastEditTime: 2024-05-29 14:00:49
- * @FilePath: /conf/Users/wbtrex/website/localServer/node/trexwb/git/application_framework/index.js
+ * @LastEditTime: 2024-08-01 09:28:03
+ * @FilePath: /drive/index.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
@@ -17,6 +17,7 @@ function initApp() {
   const alias = require('@utils/alias');
   const express = require('express');
   const multer = require('multer');
+
   // 缓存express以避免重复加载
   require.cache['express'] = express;
 
@@ -24,7 +25,8 @@ function initApp() {
   app.set('timeout', process.env.TIMEOUT || 30000);
 
   // 静态文件服务优化
-  app.use(express.static(alias.resolve('@static')));
+  app.use('/static', express.static(alias.resolve('@static')));
+  app.use('/download', express.static((process.env.NODE_ENV === 'development' ? '/app/data' : '/data') + '/download'));
 
   // 解析请求体的中间件应放在前面
   app.use(express.urlencoded({ extended: true }));
@@ -38,24 +40,8 @@ function initApp() {
     res.sendStatus(200);
   });
 
-  app.use((req, res, next) => {
-    req.body = Object.assign({}, req.body) // JSON.parse(JSON.stringify(req.body));
-    req.msg = null;
-    req.app = app;
-    req.handleError = function (code, error, write = false) {
-      req.code = code;
-      req.msg = error ? error.toString() : null;
-      if ((write || String(code).startsWith('500')) && req.msg) {
-        // 日志使用
-        const logCast = require('@cast/log');
-        const forwardedFor = req.headers['x-forwarded-for'] || '';
-        const ip = forwardedFor.split(',')[0] || req.ip;
-        req.realIP = ip;
-        logCast.writeError(req.msg, { ...req.headers, ...req.body }, req.realIP);
-      }
-    }
-    next();
-  });
+  const responseMiddleware = require('@middleware/response');
+  app.use(responseMiddleware.factory);
 
   app.get('/', function (req, res) {
     res.status(200).sendFile(alias.resolve('@resources/view/index.html'));
@@ -65,17 +51,22 @@ function initApp() {
   const notifyRouter = require('@middleware/notify');
   app.use(`/notify`, notifyRouter);
 
+  // 其他可访问路由
+  const routeMiddleware = require('@middleware/route');
+  // 前台
+  // app.use(routeMiddleware.web);
+  routeMiddleware.web(app);
+
   const verifyMiddleware = require('@middleware/verify');
   // app.use(verifyMiddleware.sanitizeInput); // 安全过滤
   app.use(verifyMiddleware.token); // appid校验
-  app.use(verifyMiddleware.sign); // 安全传输加密
+  if (process.env.REQUEST_ENCRYPT === 'true') { app.use(verifyMiddleware.sign); } // 安全传输加密
+  // 接口
+  // app.use(routeMiddleware.api);
+  routeMiddleware.api(app);
 
-  const routeMiddleware = require('@middleware/route');
-  routeMiddleware.controller(app);
-  // app.use(routeMiddleware.controller);
-
-  const responseMiddleware = require('@middleware/response');
-  app.use(responseMiddleware.factory);
+  // 输出
+  app.use(responseMiddleware.build);
 
   app.listen(process.env.PORT || 8000, function () {
     console.log(`Server running at ${process.env.APP_URL || 'http://0.0.0.0'}:${process.env.PORT || 8000}/`);
@@ -107,19 +98,23 @@ if (process.env.MULTIPLE_PROCESSES === "true") {
 }
 
 // 计划任务
-const schedule = require('@root/src/schedule/task');
+const schedule = require('@schedule/index');
 schedule.handler();
 
 // 消息消费
-const queue = require('@job/queue');
-queue.handler();
+const job = require('@job/index');
+job.queue.handler();
 
-exports.handler = async function(event, context) {
+// FC/serverless 相关方法
+exports.handler = async function (event, context) {
   // console.log("event: \n" + event);
   return "Success";
 };
-
-exports.pre_stop = (context, callback) => {
+exports.initialize = function (context, callback) {
+  // console.log('initializer');
+  callback(null, "");
+};
+module.exports.preFreeze = function (context, callback) {
   try {
     // 销毁服务前关闭数据库
     const cacheCast = require('@cast/cache');
@@ -129,6 +124,29 @@ exports.pre_stop = (context, callback) => {
     // 销毁服务前关闭数据库
     const databaseCast = require('@cast/database');
     databaseCast.destroy();
+  } catch (e) { }
+  try {
+    // 销毁服务前关闭数据库
+    const job = require('@job/index');
+    job.queue.destroy();
+  } catch (e) { }
+  callback(null, "");
+};
+module.exports.preStop = function (context, callback) {
+  try {
+    // 销毁服务前关闭数据库
+    const cacheCast = require('@cast/cache');
+    cacheCast.destroy();
+  } catch (e) { }
+  try {
+    // 销毁服务前关闭数据库
+    const databaseCast = require('@cast/database');
+    databaseCast.destroy();
+  } catch (e) { }
+  try {
+    // 销毁服务前关闭数据库
+    const job = require('@job/index');
+    job.queue.destroy();
   } catch (e) { }
   callback(null, '');
 }
