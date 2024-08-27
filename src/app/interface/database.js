@@ -1,9 +1,9 @@
 /*** 
  * @Author: trexwb
- * @Date: 2024-01-15 19:58:20
+ * @Date: 2024-08-23 11:39:53
  * @LastEditors: trexwb
- * @LastEditTime: 2024-05-29 11:10:12
- * @FilePath: /laboratory/application/drive/src/app/cast/database.js
+ * @LastEditTime: 2024-08-23 17:23:43
+ * @FilePath: /drive/src/app/interface/database.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
@@ -13,7 +13,7 @@
 // console.log(process.env.NODE_ENV, process.env);
 const knex = require('knex');
 const knexConfig = require('@config/knex');
-// const logCast = require('@cast/log');
+// const logInterface = require('@interface/log');
 
 // const dbRead = knex(knexConfig.read);
 // const dbWrite = knex(knexConfig.write);

@@ -1,13 +1,13 @@
 {
   "name": "application_drive",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "驱动器模块，用于提供api接口整合",
   "main": "index.js",
   "scripts": {
     "setup": "knex migrate:latest && knex seed:run",
-    "dev": "nodemon --trace-deprecation index.js",
-    "start": "node index.js",
-    "backup": "NODE_ENV=production node ./backup.js",
+    "dev": "nodemon --trace-deprecation ./src/index.js",
+    "start": "node ./src/index.js",
+    "backup": "NODE_ENV=production node ./src/backup.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -40,16 +40,17 @@
     "@app": "./src/app",
     "@cast": "./src/app/cast",
     "@controller": "./src/app/controller",
-    "@route": "./src/app/route",
+    "@event": "./src/app/event",
     "@helper": "./src/app/helper",
+    "@interface": "./src/app/interface",
+    "@job": "./src/app/job",
     "@middleware": "./src/app/middleware",
     "@model": "./src/app/model",
+    "@schedule": "./src/app/schedule",
     "@service": "./src/app/service",
     "@config": "./src/config",
-    "@event": "./src/event",
-    "@job": "./src/job",
     "@resources": "./src/resources",
-    "@schedule": "./src/schedule",
+    "@route": "./src/route",
     "@utils": "./src/utils",
     "@static": "./src/static"
   },
@@ -58,5 +59,5 @@
     "@types/multer": "^1.4.11",
     "nodemon": "^3.1.4"
   },
-  "packageManager": "yarn@1.22.21+sha1.1959a18351b811cdeedbd484a8f86c3cc3bbaf72"
+  "packageManager": "yarn@1.22.22"
 }

@@ -2,8 +2,8 @@
  * @Author: trexwb
  * @Date: 2024-03-11 19:59:12
  * @LastEditors: trexwb
- * @LastEditTime: 2024-05-09 09:34:09
- * @FilePath: /laboratory/application/drive/backup.js
+ * @LastEditTime: 2024-08-27 11:56:57
+ * @FilePath: //application_framework/src/backup.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
@@ -16,8 +16,8 @@ const path = require('path');
 const fs = require('fs');
 const alias = require('@utils/alias');
 
-const databaseCast = require('@cast/database');
-const dbRead = databaseCast.dbRead();
+const dbInterface = require('@interface/database');
+const dbRead = dbInterface.dbRead();
 
 async function backupTable(table) {
   return await dbRead.select('*').from(`${process.env.DB_PREFIX}${table}`).then(async (data) => {

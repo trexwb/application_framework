@@ -2,8 +2,8 @@
  * @Author: trexwb
  * @Date: 2024-01-09 08:52:32
  * @LastEditors: trexwb
- * @LastEditTime: 2024-08-01 09:28:03
- * @FilePath: /drive/index.js
+ * @LastEditTime: 2024-08-27 11:56:52
+ * @FilePath: //application_framework/src/index.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
@@ -12,7 +12,14 @@
 'use strict';
 require('dotenv').config();
 require('module-alias/register');
-
+/**
+ * 初始化应用程序
+ * 
+ * 本函数负责配置和启动express应用它包括设置超时时间、处理静态文件、
+ * 解析请求体、配置跨域访问、应用中间件和路由最后监听指定端口
+ * 
+ * @returns {Function} 返回express应用实例
+ */
 function initApp() {
   const alias = require('@utils/alias');
   const express = require('express');
@@ -40,33 +47,20 @@ function initApp() {
     res.sendStatus(200);
   });
 
-  const responseMiddleware = require('@middleware/response');
-  app.use(responseMiddleware.factory);
+  const middlewareRes = require('@middleware/response');
+  app.use(middlewareRes.factory);
 
   app.get('/', function (req, res) {
     res.status(200).sendFile(alias.resolve('@resources/view/index.html'));
   });
 
-  // 通知类路由
-  const notifyRouter = require('@middleware/notify');
-  app.use(`/notify`, notifyRouter);
-
   // 其他可访问路由
-  const routeMiddleware = require('@middleware/route');
-  // 前台
-  // app.use(routeMiddleware.web);
-  routeMiddleware.web(app);
-
-  const verifyMiddleware = require('@middleware/verify');
-  // app.use(verifyMiddleware.sanitizeInput); // 安全过滤
-  app.use(verifyMiddleware.token); // appid校验
-  if (process.env.REQUEST_ENCRYPT === 'true') { app.use(verifyMiddleware.sign); } // 安全传输加密
-  // 接口
-  // app.use(routeMiddleware.api);
-  routeMiddleware.api(app);
+  const middlewareRoute = require('@middleware/route');
+  middlewareRoute.web(app);
+  middlewareRoute.api(app);
 
   // 输出
-  app.use(responseMiddleware.build);
+  app.use(middlewareRes.build);
 
   app.listen(process.env.PORT || 8000, function () {
     console.log(`Server running at ${process.env.APP_URL || 'http://0.0.0.0'}:${process.env.PORT || 8000}/`);
@@ -117,13 +111,13 @@ exports.initialize = function (context, callback) {
 module.exports.preFreeze = function (context, callback) {
   try {
     // 销毁服务前关闭数据库
-    const cacheCast = require('@cast/cache');
-    cacheCast.destroy();
+    const cacheInterface = require('@interface/cache');
+    cacheInterface.destroy();
   } catch (e) { }
   try {
     // 销毁服务前关闭数据库
-    const databaseCast = require('@cast/database');
-    databaseCast.destroy();
+    const dbInterface = require('@interface/database');
+    dbInterface.destroy();
   } catch (e) { }
   try {
     // 销毁服务前关闭数据库
@@ -135,13 +129,13 @@ module.exports.preFreeze = function (context, callback) {
 module.exports.preStop = function (context, callback) {
   try {
     // 销毁服务前关闭数据库
-    const cacheCast = require('@cast/cache');
-    cacheCast.destroy();
+    const cacheInterface = require('@interface/cache');
+    cacheInterface.destroy();
   } catch (e) { }
   try {
     // 销毁服务前关闭数据库
-    const databaseCast = require('@cast/database');
-    databaseCast.destroy();
+    const dbInterface = require('@interface/database');
+    dbInterface.destroy();
   } catch (e) { }
   try {
     // 销毁服务前关闭数据库
