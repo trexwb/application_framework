@@ -3,7 +3,7 @@
  * @Date: 2024-08-27 11:59:42
  * @LastEditors: trexwb
  * @LastEditTime: 2024-08-27 12:01:39
- * @FilePath: /git/Users/wbtrex/website/localServer/node/damei/package/node/application_framework/src/app/model/secrets.js
+ * @FilePath: /lication_framework/src/app/model/secrets.js
  * @Description
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 

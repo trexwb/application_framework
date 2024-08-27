@@ -3,7 +3,7 @@
  * @Date: 2024-08-23 14:31:48
  * @LastEditors: trexwb
  * @LastEditTime: 2024-08-27 11:58:26
- * @FilePath: //application_framework/src/app/cast/boolean.js
+ * @FilePath: /lication_framework/src/app/cast/boolean.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 

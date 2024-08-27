@@ -3,7 +3,7 @@
  * @Date: 2024-01-09 08:52:32
  * @LastEditors: trexwb
  * @LastEditTime: 2024-08-27 11:56:52
- * @FilePath: //application_framework/src/index.js
+ * @FilePath: /lication_framework/src/index.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
