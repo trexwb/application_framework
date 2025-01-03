@@ -1,24 +1,24 @@
 /*** 
  * @Author: trexwb
- * @Date: 2024-08-27 11:59:42
+ * @Date: 2024-01-12 08:45:55
  * @LastEditors: trexwb
- * @LastEditTime: 2024-08-27 12:00:54
- * @FilePath: /lication_framework/src/app/model/secretsLogs.js
- * @Description
+ * @LastEditTime: 2025-01-03 10:02:20
+ * @FilePath: /git/application_framework/src/app/model/secretsLogs.js
+ * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
  */
 'use strict';
 const dbInterface = require('@interface/database');
 const baseModel = require('@model/base');
-const CastBoolean = require('@cast/boolean');
-const CastDatetime = require('@cast/datetime');
 const CastInteger = require('@cast/integer');
 const CastJson = require('@cast/json');
-const CastString = require('@cast/string');
+
+// 清理 dbInterface.prefix，防止特殊字符导致表名无效
+const cleanedPrefix = dbInterface.prefix.replace(/[^a-zA-Z0-9_]/g, '');
 
 const secretsLogsModel = {
-  $table: `${dbInterface.prefix}secrets_logs`,// 为模型指定表名
+  $table: `${cleanedPrefix}secrets_logs`,// 为模型指定表名
   $primaryKey: 'id', // 默认情况下指定'id'作为表主键，也可以指定主键名
   $fillable: [
     'secret_id',

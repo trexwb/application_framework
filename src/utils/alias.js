@@ -1,12 +1,12 @@
-/*
+/*** 
  * @Author: trexwb
- * @Date: 2023-12-30 08:48:12
- * @LastEditTime: 2023-12-30 08:48:53
+ * @Date: 2024-12-19 11:26:06
  * @LastEditors: trexwb
- * @Description: In User Settings Edit
- * @FilePath: /node/damei/laboratory/applications/drive/src/utils/alias.js
- * 一花一世界，一叶一如来
- * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
+ * @LastEditTime: 2025-01-03 09:57:32
+ * @FilePath: /git/application_framework/src/utils/alias.js
+ * @Description: 
+ * @一花一世界，一叶一如来
+ * @Copyright (c) 2025 by 杭州大美, All Rights Reserved. 
  */
 'use strict';
 const path = require('path');

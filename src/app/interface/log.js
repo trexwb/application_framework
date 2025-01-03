@@ -2,14 +2,14 @@
  * @Author: trexwb
  * @Date: 2024-03-13 12:12:05
  * @LastEditors: trexwb
- * @LastEditTime: 2024-08-20 18:48:04
- * @FilePath: /drive/src/app/cast/log.js
+ * @LastEditTime: 2025-01-03 10:01:03
+ * @FilePath: /git/application_framework/src/app/interface/log.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
  */
 'use strict';
-// log.js
+require('dotenv').config();
 const ALY = require('aliyun-sdk');
 
 class LogService {

@@ -1,4 +1,15 @@
 # 开发日志
+## 1.1.1 （2025-12-03）
+- 更新 package.json 依赖版本
+- 优化 boolean、cache、datetime 等类型转换逻辑
+- 重构 baseHelper 中的缓存处理逻辑，提高可读性和维护性
+- 优化 secretsHelper 中的查询逻辑
+- 修复 RedisCache 中的连接和错误处理
+- 优化 DatabaseInterface 中的数据库连接管理
+- 简化 LogService 中的日志记录逻辑
+- 移除未使用的 notify 中间件
+- 重构 response 中间件，提高错误处理和响应构建的可读性
+
 ## 1.1.0 （2024-08-01）
 升级了底层的很多业务逻辑，比如增加了队列、计划任务、事务，数据库连接的调整等
 

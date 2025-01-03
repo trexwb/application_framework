@@ -2,18 +2,17 @@
  * @Author: trexwb
  * @Date: 2024-01-29 08:30:58
  * @LastEditors: trexwb
- * @LastEditTime: 2024-06-13 09:05:19
- * @FilePath: /laboratory/application/drive/src/config/knex.js
+ * @LastEditTime: 2025-01-03 09:58:26
+ * @FilePath: /git/application_framework/src/config/knex.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
  */
 'use strict';
-// Update with your config settings.
-// require('dotenv').config();
+require('dotenv').config();
 // console.log(process.env.NODE_ENV, process.env);
-const alias = require('@utils/alias');
-const logCast = require('@cast/log');
+// const alias = require('@utils/alias');
+const logInterface = require('@interface/log');
 
 // 重构代码以提高可读性和可维护性
 function generateConfig(connectionType) {
@@ -33,20 +32,20 @@ function generateConfig(connectionType) {
     acquireConnectionTimeout: 6000,
     log: {
       warn(message) {
-        logCast.writeError(`[knex warn]:${message}`)
+        logInterface.writeError(`[knex warn]:${message}`)
       },
       error(message) {
-        logCast.writeError(`[knex error:${message}`)
+        logInterface.writeError(`[knex error:${message}`)
       },
       deprecate(message) {
-        logCast.writeError(`[knex deprecate:${message}`)
+        logInterface.writeError(`[knex deprecate:${message}`)
       },
       debug(message) {
-        logCast.writeError(`[knex debug:${message}`)
+        logInterface.writeError(`[knex debug:${message}`)
       }
     }
   };
-  if (connectionType === 'mysql' || connectionType === 'mysql2') {
+  if (connectionType.includes('mysql')) {
     return {
       write: {
         client: process.env.DB_CONNECTION || 'mysql2',
@@ -78,26 +77,26 @@ function generateConfig(connectionType) {
       }
     };
   }
-  if (connectionType === 'sqlite' || connectionType === 'sqlite3' || connectionType === 'better-sqlite3') {
-    return {
-      write: {
-        client: process.env.DB_CONNECTION || 'better-sqlite3',
-        connection: {
-          filename: alias.resolve(`@resources/database/${process.env.DB_FILE || 'database.db'}`),
-          prefix: process.env.DB_PREFIX || '',
-        },
-        ...commonConfig,
-      },
-      read: {
-        client: process.env.DB_CONNECTION || 'better-sqlite3',
-        connection: {
-          filename: alias.resolve(`@resources/database/${process.env.DB_FILE || 'database.db'}`),
-          prefix: process.env.DB_PREFIX || '',
-        },
-        ...commonConfig,
-      }
-    };
-  }
+  // if (connectionType.includes('sqlite')) {
+  //   return {
+  //     write: {
+  //       client: process.env.DB_CONNECTION || 'better-sqlite3',
+  //       connection: {
+  //         filename: alias.resolve(`@resources/database/${process.env.DB_FILE || 'database.db'}`),
+  //         prefix: process.env.DB_PREFIX || '',
+  //       },
+  //       ...commonConfig,
+  //     },
+  //     read: {
+  //       client: process.env.DB_CONNECTION || 'better-sqlite3',
+  //       connection: {
+  //         filename: alias.resolve(`@resources/database/${process.env.DB_FILE || 'database.db'}`),
+  //         prefix: process.env.DB_PREFIX || '',
+  //       },
+  //       ...commonConfig,
+  //     }
+  //   };
+  // }
   // 如果未识别数据库类型，则抛出错误
   throw new Error('Unsupported DB_CONNECTION type');
 }

@@ -2,8 +2,8 @@
  * @Author: trexwb
  * @Date: 2024-01-04 14:28:29
  * @LastEditors: trexwb
- * @LastEditTime: 2024-07-04 11:11:38
- * @FilePath: /drive/src/app/middleware/route.js
+ * @LastEditTime: 2025-01-03 10:01:55
+ * @FilePath: /git/application_framework/src/app/middleware/route.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
@@ -11,94 +11,45 @@
 'use strict';
 
 const path = require('path');
-const glob = require('glob');
 const alias = require('@utils/alias');
+
+// 按需引入依赖
+const glob = require('glob');
+// const { globSync } = require('fs');
+
+/**
+ * 加载路由文件并注册到 app 中
+ * @param {string} basePath - 路由文件的基础路径
+ * @param {string} prefix - 路由前缀
+ * @param {Express.Application} app - Express 应用实例
+ */
+async function loadRoutes(basePath, prefix, app) {
+  try {
+    const files = glob.sync(`${basePath}/**/*.js`);
+    await Promise.all(files.map(async (file) => {
+      // 获取文件名和目录名
+      const lastDirectory = path.basename(path.dirname(file));
+      const routeName = path.basename(file, '.js');
+      // 动态加载文件
+      const route = require(file);
+      // 添加路由
+      // console.log(path.join('/', prefix, lastDirectory, routeName));
+      if (lastDirectory === 'web') {
+        app.use(`/${routeName}`, route);
+      } else {
+        app.use(path.join('/', prefix, lastDirectory, routeName), route);
+      }
+    }));
+  } catch (error) {
+    console.error(`路由加载错误: ${error.stack}`);
+  }
+}
+
 module.exports = {
-  web: (app) => {
-    try {
-      const files = glob.sync(`${alias.resolve(`@route`)}/web/**/*.js`);
-      files.forEach(file => {
-        // 获取文件名
-        const lastDirectory = path.dirname(file).split('/').pop();
-        const routeName = path.basename(file).split('.')[0];
-        // 动态加载文件
-        const route = require(file);
-        // 添加路由
-        if (lastDirectory === 'web') {
-          app.use(`/${routeName}`, route);
-        } else {
-          app.use(`/${lastDirectory}/${routeName}`, route);
-        }
-      });
-    } catch (e) {
-      console.log(`route:web路由错误`);
-    }
+  web: async (app) => {
+    await loadRoutes(alias.resolve('@route/web'), '', app);
   },
-  api: (app) => {
-    try {
-      const files = glob.sync(`${alias.resolve(`@route`)}/api/**/*.js`);
-      files.forEach(file => {
-        // 获取文件名
-        const lastDirectory = path.dirname(file).split('/').pop();
-        const routeName = path.basename(file).split('.')[0];
-        // 动态加载文件
-        const route = require(file);
-        // 添加路由
-        app.use(`/api/${lastDirectory}/${routeName}`, route);
-      });
-    } catch (e) {
-      console.log(`route:api路由错误`);
-    }
-  },
-  /**
-   * 根据路由识别版本号
-   * 已废弃
-   */
-  // version: (app) => {
-  //   const defaultVersion = 'v1';
-  //   const versionHeader = req.headers['version'] || defaultVersion;
-  //   let dirPath = alias.resolve(`@route/${versionHeader}`);
-  //   try {
-  //     const files = glob.sync(`${dirPath}/*.js`);
-  //     files.forEach(file => {
-  //       // 获取文件名
-  //       const routeName = file.split('.')[0];
-  //       // 动态加载文件
-  //       const route = require(alias.resolve(`@route/${versionHeader}/${file}`));
-  //       // 添加路由
-  //       app.use(`/api/${routeName}`, route);
-  //       app.use(`/api/${versionHeader}/${routeName}`, route);
-  //     });
-  //     // fs.readdirSync(dirPath).forEach(file => {
-  //     // 	const routeName = file.split('.')[0];
-  //     // 	const route = require(alias.resolve(`@route/${versionHeader}/${file}`));
-  //     // 	app.use(`/${routeName}`, route);
-  //     // 	app.use(`/${versionHeader}/${routeName}`, route);
-  //     // });
-  //   } catch (e) {
-  //     console.log(`header:版本号[${versionHeader}]错误`);
-  //   }
-  //   const versionPath = (path.parse(req.originalUrl)['dir'] || defaultVersion).replace('\/', '');
-  //   if (versionPath && /^v\d$/.test(versionPath) && versionHeader !== versionPath) {
-  //     dirPath = alias.resolve(`@route/${versionPath}`);
-  //     try {
-  //       const files = glob.sync(`${dirPath}/*.js`);
-  //       files.forEach(file => {
-  //         // 获取文件名
-  //         const routeName = file.split('.')[0];
-  //         // 动态加载文件
-  //         const route = require(alias.resolve(`@route/${versionHeader}/${file}`));
-  //         // 添加路由
-  //         app.use(`/api/${versionHeader}/${routeName}`, route);
-  //       });
-  //       // fs.readdirSync(dirPath).forEach(file => {
-  //       // 	const routeName = file.split('.')[0];
-  //       // 	const route = require(alias.resolve(`@route/${versionPath}/${file}`));
-  //       // 	app.use(`/${versionPath}/${routeName}`, route);
-  //       // });
-  //     } catch (e) {
-  //       console.log(`path:版本号[${versionPath}]错误`);
-  //     }
-  //   }
-  // }
+  api: async (app) => {
+    await loadRoutes(alias.resolve('@route/api'), 'api', app);
+  }
 }

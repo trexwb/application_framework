@@ -2,8 +2,8 @@
  * @Author: trexwb
  * @Date: 2024-08-23 11:42:01
  * @LastEditors: trexwb
- * @LastEditTime: 2024-08-23 17:23:31
- * @FilePath: /drive/src/app/interface/cache.js
+ * @LastEditTime: 2025-01-03 10:00:51
+ * @FilePath: /git/application_framework/src/app/interface/cache.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
@@ -35,12 +35,13 @@ class RedisCache {
    * 创建Redis客户端实例
    */
   async createClient() {
+    if(!redisConfig.host) return null;
     try {
       return await redis.createClient({
         password: redisConfig.password || '',
         socket: {
-          host: redisConfig.host || '',
-          port: redisConfig.port || '',
+          host: redisConfig.host,
+          port: redisConfig.port || 6379,
         },
         database: redisConfig.db || 0,
       }).on('error', () => {
@@ -48,7 +49,6 @@ class RedisCache {
       }).connect();
     } catch (error) {
       logInterface.writeError(`Error initializing Redis client: ${error}`);
-      throw __filename + ':' + error.toString();
     }
   }
 
@@ -74,6 +74,7 @@ class RedisCache {
    */
   async get(key) {
     const client = await this.connect();
+    if(!client) return null;
     try {
       const value = await client.get(redisConfig.prefix + key);
       return value ? JSON.parse(value) : null; // 返回null而不是false
@@ -88,6 +89,7 @@ class RedisCache {
    */
   async del(key) {
     const client = await this.connect();
+    if(!client) return null;
     try {
       await client.del(redisConfig.prefix + key);
     } catch (error) {
@@ -101,6 +103,7 @@ class RedisCache {
   async setCacheWithTags(tags, key, value) {
     if (!value) return;
     const client = await this.connect();
+    if(!client) return null;
     try {
       await Promise.all([
         client.sAdd(`${redisConfig.prefix}tag:${tags}`, redisConfig.prefix + key),
@@ -116,6 +119,7 @@ class RedisCache {
    */
   async clearCacheByTag(tag) {
     const client = await this.connect();
+    if(!client) return null;
     try {
       const keys = await client.sMembers(`${redisConfig.prefix}tag:${tag}`);
       await Promise.all(keys.map(async (key) => {

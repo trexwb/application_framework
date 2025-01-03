@@ -2,8 +2,8 @@
  * @Author: trexwb
  * @Date: 2024-01-17 13:50:21
  * @LastEditors: trexwb
- * @LastEditTime: 2024-05-13 15:04:38
- * @FilePath: /laboratory/application/drive/src/app/service/account.js
+ * @LastEditTime: 2025-01-03 10:03:02
+ * @FilePath: /git/application_framework/src/app/service/account.js
  * @Description: 
  * @一花一世界，一叶一如来
  * Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
@@ -15,15 +15,11 @@ const serversHelper = require('@helper/servers');
 const cryptTool = require('@utils/cryptTool');
 
 module.exports = {
-	siteId: false, // 当前项目的站点编号
 	proxy: null,
 	serverRow: null,
 	getClient: null,
-	setSiteId: async function (siteId) {
-		this.siteId = siteId || false;
-	},
   setServer: async function () {
-    this.serverRow = await serversHelper.getKey('account');
+    this.serverRow = await serversHelper.getKey('accounts');
     if (!this.serverRow) {
 			throw false;
 		}
@@ -37,7 +33,6 @@ module.exports = {
 
 		this.getClient.setHeader("App-Id", this.serverRow?.app_id);
 		this.getClient.setHeader("App-Secret", newSecret);
-		this.getClient.setHeader("Site-Id", this.siteId);
 
 		if (this.serverRow?.extension?.mode === 'strict') { // 严格模式
 			this.proxy = await this.getClient.useService(['rpc_getFunctions']);
@@ -49,10 +44,7 @@ module.exports = {
 		}
 		return this.proxy;
 	},
-	connectionService: async function (siteId) {
-		if (siteId) {
-			await this.setSiteId(siteId)
-		}
+	connectionService: async function () {
     if (!this.serverRow) {
       await this.setServer();
     }

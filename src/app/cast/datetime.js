@@ -2,14 +2,15 @@
  * @Author: trexwb
  * @Date: 2024-08-23 14:43:35
  * @LastEditors: trexwb
- * @LastEditTime: 2024-08-27 11:58:33
- * @FilePath: /lication_framework/src/app/cast/datetime.js
+ * @LastEditTime: 2024-10-31 09:12:15
+ * @FilePath: /interface/application/drive/src/app/cast/datetime.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
  */
-'use strict';
-const moment = require('moment-timezone');
+
+// const moment = require('moment-timezone');
+
 // const DEFAULT_LIMIT = 10; // 默认分页限制
 // const MAX_LIMIT = 1000; // 最大分页限制
 // const SHANGHAI_TZ = 'Asia/Shanghai'; // 时区常量
@@ -25,6 +26,7 @@ class CastDatetime {
     this.rules = rules;
   }
   get(value) {
+    if(!value) return null;
     // 尝试将字符串转换为 Date 对象
     const date = new Date(value);
     if (isNaN(date.getTime())) {
@@ -34,11 +36,12 @@ class CastDatetime {
   }
 
   set(value) {
+    if(!value) return null;
     // 检查是否为 Date 对象，如果不是，则返回当前时间的 ISO 格式字符串
     if (!(value instanceof Date)) {
-      return new Date().toISOString(); // 返回当前时间的 ISO 格式字符串
+      return new Date().toISOString().replace('T', ' ').substring(0, 19); // 返回当前时间的 ISO 格式字符串
     }
-    return value.toISOString(); // 返回 ISO 格式字符串
+    return value.toISOString().replace('T', ' ').substring(0, 19); // 返回 ISO 格式字符串
   }
 }
 

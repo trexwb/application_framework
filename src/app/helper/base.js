@@ -1,13 +1,14 @@
 /*** 
  * @Author: trexwb
- * @Date: 2024-08-27 11:59:04
+ * @Date: 2024-08-22 15:11:15
  * @LastEditors: trexwb
- * @LastEditTime: 2024-08-27 11:59:04
- * @FilePath: /lication_framework/src/app/helper/base.js
+ * @LastEditTime: 2025-01-03 10:00:31
+ * @FilePath: /git/application_framework/src/app/helper/base.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
  */
+
 'use strict';
 const utils = require('@utils/index');
 const cacheCast = require('@cast/cache');
@@ -28,213 +29,147 @@ const baseHelper = {
     if (where.id) {
       applyWhereCondition('id', where.id);
     }
+    // that.whereIn('id', function() {
+    //   this.select('user_id').from(usersRolesModel.$table).whereIn('role_id', where.role_id);
+    // });
+    // 多表联合查询效率低下时请将whereIn更换成whereExists如：
+    // that.whereExists(function () {
+    //   if (Array.isArray(where.role_id)) {
+    //     if (where.role_id.length > 0) {
+    //       this.select('user_id')
+    //         .from(usersRolesModel.$table)
+    //         .whereRaw(`${usersRolesModel.$table}.user_id = ${that.$table}.id`)
+    //         .whereIn('role_id', where.role_id);
+    //     }
+    //   } else {
+    //     this.select('user_id')
+    //       .from(usersRolesModel.$table)
+    //       .whereRaw(`${usersRolesModel.$table}.user_id = ${that.$table}.id`)
+    //       .where('role_id', where.role_id);
+    //   }
+    // })
   },
-  getAll: async function (where) { // await categoriesHelper.getList({keywords: '1',status: '0'});
-    let rows = [];
+  executeWithCache: async function (cacheKey, fn) {
     try {
-      const sortWhere = utils.sortMultiDimensionalObject(where);
-      const cacheKey = `${this.$cacheKey}[all:${JSON.stringify([sortWhere])}]`;
-      rows = await cacheCast.get(cacheKey);
-      if (!rows) {
-        const that = this;
-        rows = await this.$model.getAll(function () {
-          that.buildWhere(this, where);
-        });
-        if (rows) {
-          cacheCast.setCacheWithTags(this.$cacheKey, cacheKey, rows);
+      let result = await cacheCast.get(cacheKey);
+      if (!result) {
+        result = await fn();
+        if (result) {
+          cacheCast.setCacheWithTags(this.$cacheKey, cacheKey, result);
         }
       }
+      return result;
     } catch (error) {
-      throw __filename + ':' + error.toString();
+      throw error;
     }
-    return rows;
+  },
+  getAll: async function (where) { // await categoriesHelper.getList({keywords: '1',status: '0'});
+    const sortWhere = utils.sortMultiDimensionalObject(where);
+    const cacheKey = `${this.$cacheKey}[all:${JSON.stringify([sortWhere])}]`;
+    return await this.executeWithCache(cacheKey, async () => {
+      return await this.$model.getAll((query) => this.buildWhere(query, where));
+    });
   },
   getList: async function (where, order, _page, _pageSize) { // await secretsHelper.getList({keywords: '1',status: '0'});
     if (!this.$model) return null;
-    let rows = {};
-    try {
-      const sortWhere = utils.sortMultiDimensionalObject(where);
-      const sortOrder = utils.sortMultiDimensionalObject(order);
-      const page = utils.safeCastToInteger(_page ?? 1);
-      const pageSize = utils.safeCastToInteger(_pageSize ?? 10);
-      const offset = utils.safeCastToInteger(!page ? 0 : pageSize * (page - 1));
-      const cacheKey = `${this.$cacheKey}[list:${JSON.stringify([sortWhere, sortOrder, page, pageSize])}]`;
-      // const release = await mutex.acquire(cacheKey);
-      // try {
-      rows = await cacheCast.get(cacheKey);
-      if (!rows?.total) {
-        const that = this;
-        rows = await this.$model.getList(function () {
-          that.buildWhere(this, where)
-        }, order, pageSize, offset);
-        if (rows?.total) {
-          cacheCast.setCacheWithTags(this.$cacheKey, cacheKey, rows);
-        }
-      }
-      // } finally {
-      //   release();
-      // }
-    } catch (error) {
-      throw __filename + ':' + error.toString();
-    }
-    return rows;
+    const sortWhere = utils.sortMultiDimensionalObject(where);
+    const sortOrder = utils.sortMultiDimensionalObject(order);
+    const page = utils.safeCastToInteger(_page ?? 1);
+    const pageSize = utils.safeCastToInteger(_pageSize ?? 10);
+    const offset = utils.safeCastToInteger(!page ? 0 : pageSize * (page - 1));
+    const cacheKey = `${this.$cacheKey}[list:${JSON.stringify([sortWhere, sortOrder, page, pageSize])}]`;
+
+    return await this.executeWithCache(cacheKey, async () => {
+      return await this.$model.getList(
+        (query) => this.buildWhere(query, where),
+        order,
+        pageSize,
+        offset
+      );
+    });
   },
   getRow: async function (where) {
-    if (!this.$model) return null;
-    if (!where) return null;
-    let row = null;
-    try {
-      const sortWhere = utils.sortMultiDimensionalObject(where);
-      const cacheKey = `${this.$cacheKey}[row:${JSON.stringify([sortWhere])}]`;
-      // const release = await mutex.acquire(cacheKey);
-      // try {
-      row = await cacheCast.get(cacheKey);
-      if (!row?.id) {
-        const that = this;
-        row = await this.$model.getRow(function () {
-          that.buildWhere(this, where);
-        });
-        if (row?.id) {
-          cacheCast.setCacheWithTags(this.$cacheKey, cacheKey, row);
-        }
-      }
-      // } finally {
-      //   release();
-      // }
-    } catch (error) {
-      throw __filename + ':' + error.toString();
-    }
-    return row;
+    if (!this.$model || !where) return null;
+
+    const sortWhere = utils.sortMultiDimensionalObject(where);
+    const cacheKey = `${this.$cacheKey}[row:${JSON.stringify([sortWhere])}]`;
+
+    return await this.executeWithCache(cacheKey, async () => {
+      return await this.$model.getRow((query) => this.buildWhere(query, where));
+    });
   },
   getId: async function (id) {
-    if (!this.$model) return null;
-    if (!id) return null;
-    let row = null;
-    try {
-      const cacheKey = `${this.$cacheKey}[id:${id}]`;
-      // const release = await mutex.acquire(cacheKey);
-      // try {
-      row = await cacheCast.get(cacheKey);
-      if (!row?.id) {
-        const that = this;
-        row = await this.$model.getRow(function () {
-          that.buildWhere(this, { "id": id });
-        });
-        if (row?.id) {
-          cacheCast.setCacheWithTags(this.$cacheKey, cacheKey, row);
-        }
-      }
-      // } finally {
-      //   release();
-      // }
-    } catch (error) {
-      throw __filename + ':' + error.toString();
-    }
-    return row;
+    if (!this.$model || !id) return null;
+
+    const cacheKey = `${this.$cacheKey}[id:${id}]`;
+
+    return await this.executeWithCache(cacheKey, async () => {
+      return await this.$model.getRow((query) => this.buildWhere(query, { id }));
+    });
   },
   getTotal: async (where) => {
     if (!this.$model) return null;
-    let rows = false;
-    try {
-      const sortWhere = utils.sortMultiDimensionalObject(where);
-      const cacheKey = `${this.$cacheKey}[total:${JSON.stringify([sortWhere])}]`;
-      rows = await cacheCast.get(cacheKey);
-      if (!rows) {
-        const that = this;
-        rows = await this.$model.getTotal(function () {
-          that.buildWhere(this, where)
-        });
-        if (rows) {
-          cacheCast.setCacheWithTags(this.$cacheKey, cacheKey, rows);
-        }
-      }
-    } catch (error) {
-      throw __filename + ':' + error.toString();
-    }
-    return rows;
+
+    const sortWhere = utils.sortMultiDimensionalObject(where);
+    const cacheKey = `${this.$cacheKey}[total:${JSON.stringify([sortWhere])}]`;
+
+    return await this.executeWithCache(cacheKey, async () => {
+      return await this.$model.getTotal((query) => this.buildWhere(query, where));
+    });
   },
   getSum: async (field, where) => {
     if (!this.$model) return null;
-    let rows = false;
-    try {
-      const sortWhere = utils.sortMultiDimensionalObject(where);
-      const cacheKey = `${this.$cacheKey}[sum:${JSON.stringify([field, sortWhere])}]`;
-      // const release = await mutex.acquire(cacheKey);
-      // try {
-      rows = await cacheCast.get(cacheKey);
-      if (!rows) {
-        const that = this;
-        rows = await this.$model.getSum(field, function () {
-          that.buildWhere(this, where)
-        });
-        if (rows) {
-          cacheCast.setCacheWithTags(this.$cacheKey, cacheKey, rows);
-        }
-      }
-      // } finally {
-      //   release();
-      // }
-    } catch (error) {
-      throw __filename + ':' + error.toString();
-    }
-    return rows;
+
+    const sortWhere = utils.sortMultiDimensionalObject(where);
+    const cacheKey = `${this.$cacheKey}[sum:${JSON.stringify([field, sortWhere])}]`;
+
+    return await this.executeWithCache(cacheKey, async () => {
+      return await this.$model.getSum(field, (query) => this.buildWhere(query, where));
+    });
   },
   update: async function (where, data) {
-    if (!this.$model) return null;
-    if (!where || !data) return null;
-    let affects = {};
+    if (!this.$model || !where || !data) return null;
+
     try {
-      const that = this;
-      affects = await this.$model.update(function () {
-        that.buildWhere(this, where)
-      }, data);
+      const affects = await this.$model.update((query) => this.buildWhere(query, where), data);
       await cacheCast.clearCacheByTag(this.$cacheKey);
+      return affects;
     } catch (error) {
       throw __filename + ':' + error.toString();
     }
-    return affects;
   },
   save: async function (data) {
-    if (!this.$model) return null;
-    if (!data) return null;
-    let affects = {};
+    if (!this.$model || !data) return null;
+
     try {
-      affects = await this.$model.save(data);
+      const affects = await this.$model.save(data);
       await cacheCast.clearCacheByTag(this.$cacheKey);
+      return affects;
     } catch (error) {
       throw __filename + ':' + error.toString();
     }
-    return affects;
   },
   restore: async function (where) {
-    if (!this.$model) return null;
-    if (!where) return null;
-    let affects = {};
+    if (!this.$model || !where) return null;
+
     try {
-      const that = this;
-      affects = await this.$model.restore(function () {
-        that.buildWhere(this, where);
-      });
+      const affects = await this.$model.restore((query) => this.buildWhere(query, where));
       await cacheCast.clearCacheByTag(this.$cacheKey);
+      return affects;
     } catch (error) {
       throw __filename + ':' + error.toString();
     }
-    return affects;
   },
   delete: async function (where) {
-    if (!this.$model) return null;
-    if (!where) return null;
-    let affects = {};
+    if (!this.$model || !where) return null;
+
     try {
-      const that = this;
-      affects = await this.$model.delete(function () {
-        that.buildWhere(this, where);
-      });
+      const affects = await this.$model.delete((query) => this.buildWhere(query, where));
       await cacheCast.clearCacheByTag(this.$cacheKey);
+      return affects;
     } catch (error) {
       throw __filename + ':' + error.toString();
     }
-    return affects;
-  },
+  }
 }
 module.exports = baseHelper;

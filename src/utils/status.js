@@ -2,16 +2,17 @@
  * @Author: trexwb
  * @Date: 2024-01-04 14:28:29
  * @LastEditors: trexwb
- * @LastEditTime: 2024-06-24 11:05:51
- * @FilePath: /drive/src/utils/status.js
+ * @LastEditTime: 2025-01-03 09:57:47
+ * @FilePath: /git/application_framework/src/utils/status.js
  * @Description: 
  * @一花一世界，一叶一如来
  * Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
  */
 'use strict';
+const _ = require('lodash');
 
-// const cacheCast = require('@cast/cache');
-// const databaseCast = require('@cast/database');
+// const cacheInterface = require('@interface/cache');
+// const databaseInterface = require('@interface/database');
 
 // 200 OK: 请求成功，对于GET和POST请求的正常回应。
 // 201 Created: 请求成功并且服务器创建了新的资源，常用于POST或PUT请求。
@@ -23,7 +24,7 @@
 // 404 Not Found: 请求的资源无法找到。
 // 500 Internal Server Error: 服务器内部错误，无法完成请求。
 // 返回码组成：状态码（3位数）+ 路由码|中间件（3位数，000表示中间件）+ 程序码（3位数定位程序问题） 如，状态码401，路由码004，程序码004，结果401004004
-const status = {
+const StatusHandler = {
   res: null,
   stream: {},
   msgMap: {
@@ -38,46 +39,42 @@ const status = {
     500: 'Internal Server Error',
   },
   set(res) {
-    status.res = res;
-    return status;
+    StatusHandler.res = res;
   },
   dictionary(code) {
-    status.stream = {
-      msg: status.msgMap[code] || 'unknown error',
+    StatusHandler.stream = {
+      msg: StatusHandler.msgMap[code] || 'unknown error',
       code: code
     }
-    return status;
+    return StatusHandler;
   },
   parsing() {
-    return Number((status.stream.code || 0).toString().substring(0, 3) || 200);
+    return Number((StatusHandler.stream.code || 0).toString().substring(0, 3) || 200);
   },
   async response(data) {
     if (data) {
       if (Array.isArray(data) && data.length === 0) {
-        status.stream.data = null;
+        StatusHandler.stream.data = null;
       } else {
-        status.stream.data = JSON.parse(JSON.stringify(data));
+        StatusHandler.stream.data = _.cloneDeep(data); // JSON.parse(JSON.stringify(data));
       }
-      // if (status.stream.data.length <= 0) {
-      //   delete status.stream.data;
-      // }
     }
-    if (status.res) {
+    if (StatusHandler.res) {
       // // 输出前关闭数据库
-      // const cacheCast = require('@cast/cache');
-      // cacheCast.destroy();
+      // const cacheInterface = require('@interface/cache');
+      // cacheInterface.destroy();
       // // 输出前关闭数据库
-      // const databaseCast = require('@cast/database');
-      // databaseCast.destroy();
-      return status.res.status(status.parsing()).send(status.stream);
+      // const dbInterface = require('@interface/database');
+      // dbInterface.destroy();
+      return StatusHandler.res.status(StatusHandler.parsing()).send(StatusHandler.stream);
     }
   }
 }
 
 module.exports = {
-  msgMap: status.msgMap,
-  set: status.set,
-  dictionary: status.dictionary,
-  parsing: status.parsing,
-  response: status.response
+  msgMap: StatusHandler.msgMap,
+  set: StatusHandler.set,
+  dictionary: StatusHandler.dictionary,
+  parsing: StatusHandler.parsing,
+  response: StatusHandler.response
 };

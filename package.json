@@ -4,7 +4,7 @@
   "description": "驱动器模块，用于提供api接口整合",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --trace-deprecation ./src/index.js",
+    "dev": "node --trace-deprecation ./src/index.js",
     "start": "node ./src/index.js",
     "module:install": "yarn install",
     "module:update": "ncu -u && yarn install",
@@ -19,20 +19,20 @@
     "async-mutex": "^0.5.0",
     "cluster": "^0.7.7",
     "crypto": "^1.0.1",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.4.7",
     "events": "^3.3.0",
-    "express": "^4.19.2",
+    "express": "^4.21.2",
     "glob": "^11.0.0",
+    "glob-promise": "^6.0.7",
     "hprose": "^2.0.51",
     "knex": "^3.1.0",
+    "lodash": "^4.17.21",
     "module-alias": "^2.2.3",
     "moment": "^2.30.1",
-    "moment-timezone": "^0.5.45",
+    "moment-timezone": "^0.5.46",
     "multer": "^1.4.5-lts.1",
-    "mysql2": "^3.11.0",
+    "mysql2": "^3.11.5",
     "node-schedule": "^2.1.1",
-    "os": "^0.1.2",
-    "path": "^0.12.7",
     "redis": "^4.7.0",
     "xss": "^1.0.15"
   },
@@ -58,8 +58,7 @@
   },
   "devDependencies": {
     "@types/module-alias": "^2.0.4",
-    "@types/multer": "^1.4.11",
-    "nodemon": "^3.1.4"
+    "@types/multer": "^1.4.11"
   },
   "packageManager": "yarn@1.22.22"
 }

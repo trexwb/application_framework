@@ -2,8 +2,8 @@
  * @Author: trexwb
  * @Date: 2024-01-09 08:52:32
  * @LastEditors: trexwb
- * @LastEditTime: 2024-08-27 11:58:20
- * @FilePath: /lication_framework/src/app/cast/cache.js
+ * @LastEditTime: 2025-01-03 09:59:01
+ * @FilePath: /git/application_framework/src/app/cast/cache.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
@@ -34,7 +34,7 @@ class CastCache {
   }
 
   setCacheWithTags(tags, key, value) {
-    this.cache.del(tags, key, value);
+    this.cache.setCacheWithTags(tags, key, value);
   }
 
   clearCacheByTag(tag) {

@@ -1,10 +1,10 @@
 /*** 
  * @Author: trexwb
- * @Date: 2024-08-27 11:59:42
+ * @Date: 2024-01-10 08:57:26
  * @LastEditors: trexwb
- * @LastEditTime: 2024-08-27 12:01:39
- * @FilePath: /lication_framework/src/app/model/secrets.js
- * @Description
+ * @LastEditTime: 2025-01-03 10:02:15
+ * @FilePath: /git/application_framework/src/app/model/secrets.js
+ * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
  */
@@ -12,14 +12,15 @@
 const dbInterface = require('@interface/database');
 const baseModel = require('@model/base');
 const secretsLogsModel = require('@model/secretsLogs');
-const CastBoolean = require('@cast/boolean');
-const CastDatetime = require('@cast/datetime');
 const CastInteger = require('@cast/integer');
 const CastJson = require('@cast/json');
 const CastString = require('@cast/string');
 
+// 清理 dbInterface.prefix，防止特殊字符导致表名无效
+const cleanedPrefix = dbInterface.prefix.replace(/[^a-zA-Z0-9_]/g, '');
+
 const secretsModel = {
-  $table: `${dbInterface.prefix}secrets`,// 为模型指定表名
+  $table: `${cleanedPrefix}secrets`,// 为模型指定表名
   $primaryKey: 'id', // 默认情况下指定'id'作为表主键，也可以指定主键名
   $fillable: [
     'title',
@@ -70,8 +71,7 @@ const secretsModel = {
     }
   },
   update: async function (where, data) {
-    if (!where) return;
-    if (!data) return;
+    if (!where || !data) return;
     return await baseModel.update.apply(this, [where, data, this.writeLogs]);
   },
   save: async function (data) {

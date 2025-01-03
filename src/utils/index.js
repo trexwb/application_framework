@@ -2,8 +2,8 @@
  * @Author: trexwb
  * @Date: 2024-01-10 08:57:26
  * @LastEditors: trexwb
- * @LastEditTime: 2024-07-18 11:19:13
- * @FilePath: /drive/src/utils/index.js
+ * @LastEditTime: 2025-01-03 09:57:41
+ * @FilePath: /git/application_framework/src/utils/index.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
@@ -26,9 +26,7 @@ const utils = {
    **/
   titleCase(value) {
     if (value == null || value.length === 0) return value;
-    return value.replace(/^[a-z]/, (matchStr) => {
-      return matchStr.toLocaleUpperCase();
-    });
+    return value.replace(/^[a-z]/, matchStr => matchStr.toLocaleUpperCase());
   },
   /**
    * 把连续出现多次的字母字符串进行压缩。aaabbbbcccccd=>3a4b5cd
@@ -36,8 +34,8 @@ const utils = {
    * @param {Boolean} ignoreCase 是否忽略大小写
    */
   compressLetter(value, ignoreCase) {
+    if (typeof value !== "string") return value;
     let pattern = new RegExp("([a-zA-Z])\\1+", ignoreCase ? "ig" : "g");
-
     return value.replace(pattern, (matchStr, group_1) => {
       return matchStr.length + group_1;
     });
@@ -47,6 +45,7 @@ const utils = {
    * @param {String} value 需要处理的字符串
    **/
   trim(value) {
+    if (typeof value !== 'string') return value;
     return value.replace(/(^\s*)|(\s*$)/g, "");
   },
   /**
@@ -54,6 +53,7 @@ const utils = {
    * @param {String} value 需要处理的字符串
    **/
   trimAll(value) {
+    if (typeof value !== 'string') return value;
     return value.replace(/\s+/g, "")
   },
   /**
@@ -63,6 +63,7 @@ const utils = {
    * @param {String} newstr 替换后的字符
    **/
   replaceAll(text, repstr, newstr) {
+    if (typeof text !== 'string' || typeof repstr !== 'string' || typeof newstr !== 'string') return text;
     return text.replace(new RegExp(repstr, "gm"), newstr);
   },
   /**
@@ -70,6 +71,7 @@ const utils = {
    * @param {String} num 手机号码
    **/
   numberFormatter(num) {
+    if (typeof num !== 'string' && typeof num !== 'number') return num;
     return num.length === 11 ? num.replace(/^(\d{3})\d{4}(\d{4})$/, '$1****$2') : num;
   },
   /**
@@ -77,29 +79,26 @@ const utils = {
    * @param {String | Number} money 金额值
    **/
   moneyFormatter(money) {
-    return parseFloat(money).toFixed(2).toString().split('').reverse().join('').replace(/(\d{3})/g, '$1,')
-      .replace(
-        /\,$/, '').split('').reverse().join('');
+    if (typeof money !== 'string' && typeof money !== 'number') return money;
+    return parseFloat(money).toFixed(2).toString().split('').reverse().join('').replace(/(\d{3})/g, '$1,').replace(/\,$/, '').split('').reverse().join('');
   },
   /**
    * @desc 日期时间格式化
    * @param date 需要格式化的日期
    * @param format 格式化字符串(y-m-d h:i:s)
-   * @param type  date的格式类型：1-日期字符串(2017/12/04 12:12:12) 2-时间戳(1603676514690) 3-日期字符串，无连接符(20171204121212) 
-   * 4-new Date()时间格式(Thu Oct 01 2020 00:00:00 GMT+0800 (中国标准时间))
+   * @param type  date的格式类型：1-日期字符串(2017/12/04 12:12:12) 2-时间戳(1603676514690) 3-日期字符串，无连接符(20171204121212) 4-new Date()时间格式(Thu Oct 01 2020 00:00:00 GMT+0800 (中国标准时间))
    * @param isMs  时间戳精度是否为毫秒，默认为true（当精度为秒时传false），type=2时有效
    **/
   dateFormatter(date, format, type = 1, isMs = true) {
     let formatDate = moment(date);
     if (formatDate.isValid()) {
       // 成功解析，转换为Y-m-d H:i:s格式
-      formatDate = formatDate.format(format);
+      return formatDate.format(format);
     } else if (type === 3) {
-      formatDate = utils._formatTimeStr(date, format)
+      return utils._formatTimeStr(date, format)
     } else {
-      formatDate = utils._formatDate(format, date, type, isMs)
+      return utils._formatDate(format, date, type, isMs)
     }
-    return formatDate;
   },
   _formatDate(formatStr, fdate, type = 1, isMs) {
     if (!fdate) return '';
@@ -112,35 +111,20 @@ const utils = {
         fdate = fdate.substring(0, fdate.indexOf('.'));
       }
       fdate = fdate.replace('T', ' ').replace(/\-/g, '/');
-      if (!formatStr)
-        formatStr = "y-m-d h:i:s";
-      if (fdate) {
-        if (type === 2 || typeof fdate === 'number') {
-          fdate = isMs ? Number(fdate) : Number(fdate) * 1000
-        }
-        fTime = new Date(fdate);
-      } else {
-        fTime = new Date();
+      if (!formatStr) formatStr = "y-m-d h:i:s";
+      if (type === 2 || typeof fdate === 'number') {
+        fdate = isMs ? Number(fdate) : Number(fdate) * 1000
       }
+      fTime = new Date(fdate);
     }
-    let month = fTime.getMonth() + 1;
-    let day = fTime.getDate();
-    let hours = fTime.getHours();
-    let minu = fTime.getMinutes();
-    let second = fTime.getSeconds();
-    month = month < 10 ? '0' + month : month;
-    day = day < 10 ? '0' + day : day;
-    hours = hours < 10 ? ('0' + hours) : hours;
-    minu = minu < 10 ? '0' + minu : minu;
-    second = second < 10 ? '0' + second : second;
-    let formatArr = [
+    const formatArr = [
       fTime.getFullYear().toString(),
-      month.toString(),
-      day.toString(),
-      hours.toString(),
-      minu.toString(),
-      second.toString()
-    ]
+      String(fTime.getMonth() + 1).padStart(2, '0'),
+      String(fTime.getDate()).padStart(2, '0'),
+      String(fTime.getHours()).padStart(2, '0'),
+      String(fTime.getMinutes()).padStart(2, '0'),
+      String(fTime.getSeconds()).padStart(2, '0')
+    ];
     for (let i = 0; i < formatArr.length; i++) {
       formatStr = formatStr.replace(fStr.charAt(i), formatArr[i]);
     }
@@ -152,28 +136,22 @@ const utils = {
    * @param formatStr 需要的格式 如 y-m-d h:i:s | y/m/d h:i:s | y/m/d | y年m月d日 等
    **/
   _formatTimeStr(timeStr, formatStr) {
-    if (!timeStr) return;
-    timeStr = timeStr.toString()
-    if (timeStr.length === 14) {
-      let timeArr = timeStr.split('')
-      let fStr = 'ymdhis'
-      if (!formatStr) {
-        formatStr = 'y-m-d h:i:s'
-      }
-      let formatArr = [
-        [...timeArr].splice(0, 4).join(''),
-        [...timeArr].splice(4, 2).join(''),
-        [...timeArr].splice(6, 2).join(''),
-        [...timeArr].splice(8, 2).join(''),
-        [...timeArr].splice(10, 2).join(''),
-        [...timeArr].splice(12, 2).join('')
-      ]
-      for (let i = 0; i < formatArr.length; i++) {
-        formatStr = formatStr.replace(fStr.charAt(i), formatArr[i])
-      }
-      return formatStr
+    if (!timeStr || timeStr.length !== 14) return timeStr;
+    const timeArr = timeStr.split('');
+    const formatArr = [
+      timeArr.slice(0, 4).join(''),
+      timeArr.slice(4, 6).join(''),
+      timeArr.slice(6, 8).join(''),
+      timeArr.slice(8, 10).join(''),
+      timeArr.slice(10, 12).join(''),
+      timeArr.slice(12, 14).join('')
+    ];
+    const fStr = 'ymdhis';
+    if (!formatStr) formatStr = 'y-m-d h:i:s';
+    for (let i = 0; i < formatArr.length; i++) {
+      formatStr = formatStr.replace(fStr.charAt(i), formatArr[i]);
     }
-    return timeStr
+    return formatStr;
   },
   /**
    * @desc RGB颜色转十六进制颜色
@@ -196,9 +174,9 @@ const utils = {
    * @param hex 颜色值 #333 或 #333333
    **/
   hexToRGB(hex) {
+    if (typeof hex !== 'string' || !/^#?([a-f\d]{3}|[a-f\d]{6})$/i.test(hex)) return null;
     if (hex.length === 4) {
-      let text = hex.substring(1, 4);
-      hex = '#' + text + text;
+      hex = '#' + hex.substring(1).repeat(2);
     }
     let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
@@ -212,11 +190,7 @@ const utils = {
    * @param n 随机数位数
    **/
   unique(n) {
-    n = n || 6;
-    let rnd = (Math.floor(Math.random() * 9) + 1).toString();
-    for (let i = 1; i < n; i++)
-      rnd += Math.floor(Math.random() * 10);
-    return rnd;
+    return Math.random().toString(36).slice(-n);
   },
   /**
    * @desc 获取uuid
@@ -231,10 +205,8 @@ const utils = {
    * @param arr1 数组1
    * @param arr2 数组2 可不传
    **/
-  distinctArray(arr1, arr2) {
-    arr1 = arr1 || []
-    arr2 = arr2 || []
-    return [...new Set([...arr1, ...arr2])]
+  distinctArray(arr1 = [], arr2 = []) {
+    return [...new Set([...arr1, ...arr2])];
   },
 
   /**
@@ -272,19 +244,14 @@ const utils = {
         end = `${end} 23:59:59`
         break
       default:
-        break
+        return { start: new Date(start.replace(/\-/g, '/')), end: new Date(end.replace(/\-/g, '/')) };
     }
-
-    return {
-      start: new Date(start.replace(/\-/g, '/')),
-      end: new Date(end.replace(/\-/g, '/'))
-    }
+    return { start: new Date(start.replace(/\-/g, '/')), end: new Date(end.replace(/\-/g, '/')) };
   },
   /**
    * @desc 日期时间格式化为多久之前 如:1分钟前
    * @param date 需要格式化的日期
-   * @param type  date的格式类型：1-日期字符串(2017/12/04 12:12:12) 2-时间戳(1603676514690) 3-日期字符串，无连接符(20171204121212) 
-   * 4-new Date()时间格式(Thu Oct 01 2020 00:00:00 GMT+0800 (中国标准时间))
+   * @param type  date的格式类型：1-日期字符串(2017/12/04 12:12:12) 2-时间戳(1603676514690) 3-日期字符串，无连接符(20171204121212) 4-new Date()时间格式(Thu Oct 01 2020 00:00:00 GMT+0800 (中国标准时间))
    * @param isMs  时间戳精度是否为毫秒，默认为true（当精度为秒时传false），type=2时有效
    * @param suffix 后缀，如：30小时+ 后缀。[刚刚、昨天、前天 等为固定文本，后缀无效]
    * @param endUnit 转化截止单位，1-秒 2-分钟 3-小时 4-天 5-月 6-年，如传3（小时），则天，月，年不做转化直接返回空
@@ -360,28 +327,15 @@ const utils = {
     return res
   },
   empty(value) {
-    if (value === null || value === undefined) {
-      return true;
-    }
-    if (typeof value === 'string' && utils.trim(value) === '') {
-      return true;
-    }
-    if (Array.isArray(value) && value.length === 0) {
-      return true;
-    }
-    if (typeof value === 'object' && Object.keys(value).length === 0) {
-      return true;
-    }
+    if (value === null || value === undefined) return true;
+    if (typeof value === 'string' && utils.trim(value) === '') return true;
+    if (Array.isArray(value) && value.length === 0) return true;
+    if (typeof value === 'object' && Object.keys(value).length === 0) return true;
     return false;
   },
   generateRandomString(length) {
-    let result = '';
-    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    return Array.from({ length }, () => characters.charAt(Math.floor(Math.random() * characters.length))).join('');
   },
   // 工具函数：安全的JSON字符串化
   safeJSONStringify(value) {
@@ -393,9 +347,8 @@ const utils = {
   },
   // 工具函数：安全的整数转换
   safeCastToInteger(value) {
-    if (typeof value === 'number' && !isNaN(value)) {
-      return Number(value);
-    } else if (typeof value === 'string' && value.trim() !== '') {
+    if (typeof value === 'number' && !isNaN(value)) return Number(value);
+    if (typeof value === 'string' && value.trim() !== '') {
       const parsed = parseFloat(value);
       return isNaN(parsed) ? 0 : Number(parsed);
     }
@@ -403,14 +356,15 @@ const utils = {
   },
   // 工具函数：数组/对象排序
   sortMultiDimensionalObject(obj) {
-    if (obj && Array.isArray(obj)) {
-      return obj.length > 0 ? obj.map(item => utils.sortMultiDimensionalObject(item)) : null;
-    } else if (obj && typeof obj === 'object') {
+    if (obj && typeof obj === 'object') {
       const sortedObject = {};
-      Object.keys(obj).sort().forEach(key => {
+      const keys = Object.keys(obj).sort();
+      for (const key of keys) {
         sortedObject[key] = utils.sortMultiDimensionalObject(obj[key]);
-      });
+      }
       return Object.keys(obj).length > 0 ? sortedObject : null;
+    } else if (obj && Array.isArray(obj)) {
+      return obj.length > 0 ? obj.sort().map(item => utils.sortMultiDimensionalObject(item)) : null;
     } else {
       return obj || null;
     }
@@ -440,6 +394,12 @@ const utils = {
     // (1[0-2]|0?[1-9]|\*)\s：匹配1-12的数字或星号（*），注意月份可以是1-9或01-09。
     // 星期字段：
     // ([0-6]|\*)：匹配0-6的数字或星号（*）。
+  },
+  generateFormattedSerial(groupSize = 5, numberOfGroups = 4) {
+    const possibleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const totalLength = (groupSize || 5) * (numberOfGroups || 4);
+    const randomPart = Array.from({ length: totalLength }, () => possibleChars.charAt(Math.floor(Math.random() * possibleChars.length))).join('');
+    return 'SN-' + randomPart.match(new RegExp('.{1,' + groupSize + '}', 'g')).join('-');
   }
 }
 
@@ -464,5 +424,6 @@ module.exports = {
   safeJSONStringify: utils.safeJSONStringify,
   safeCastToInteger: utils.safeCastToInteger,
   sortMultiDimensionalObject: utils.sortMultiDimensionalObject,
-  isValidCronFormatFlexible: utils.isValidCronFormatFlexible
+  isValidCronFormatFlexible: utils.isValidCronFormatFlexible,
+  generateFormattedSerial: utils.generateFormattedSerial
 }

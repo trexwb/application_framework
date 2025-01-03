@@ -2,15 +2,14 @@
  * @Author: trexwb
  * @Date: 2024-01-04 14:28:29
  * @LastEditors: trexwb
- * @LastEditTime: 2024-05-11 21:07:05
- * @FilePath: /laboratory/application/drive/src/config/redis.js
+ * @LastEditTime: 2025-01-03 09:58:31
+ * @FilePath: /git/application_framework/src/config/redis.js
  * @Description: 
  * @一花一世界，一叶一如来
  * @Copyright (c) 2024 by 杭州大美, All Rights Reserved. 
  */
 'use strict';
-// Update with your config settings.
-// require('dotenv').config();
+require('dotenv').config();
 // console.log(process.env.NODE_ENV, process.env);
 
 module.exports = {
