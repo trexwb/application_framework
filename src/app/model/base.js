@@ -2,7 +2,7 @@
  * @Author: trexwb
  * @Date: 2024-07-17 15:50:46
  * @LastEditors: trexwb
- * @LastEditTime: 2025-01-03 10:02:10
+ * @LastEditTime: 2025-01-03 17:47:18
  * @FilePath: /git/application_framework/src/app/model/base.js
  * @Description: 
  * @一花一世界，一叶一如来
@@ -11,8 +11,9 @@
 
 'use strict';
 const dbInterface = require('@interface/database');
-const logInterface = require('@interface/log');
+const utils = require('@utils/index');
 const _ = require('lodash');
+const logInterface = require('@interface/log');
 const moment = require('moment-timezone');
 
 const DEFAULT_LIMIT = 10; // 默认分页限制
@@ -23,14 +24,6 @@ const FORMAT = 'YYYY-MM-DD HH:mm:ss'; // 日期格式常量
 // 抽象日期格式化功能
 const formatDateTime = (date, timezone = SHANGHAI_TZ, format = FORMAT) => {
   return date ? moment(date).tz(timezone).format(format) : null;
-};
-
-// 公共的 deleted_at 处理逻辑
-const handleDeletedAtQuery = (query, fields, deletedAtQuery) => {
-  if (fields.includes('deleted_at')) {
-    if (deletedAtQuery) query.whereNotNull('deleted_at');
-    else query.whereNull('deleted_at');
-  }
 };
 
 const baseModel = {
@@ -48,21 +41,27 @@ const baseModel = {
         .from(this.$table)
         .where(where);
       // 根据是否删除来添加相应的查询条件
-      handleDeletedAtQuery(query, fields, deletedAtQuery);
+      if (fields.includes('deleted_at')) {
+        if (deletedAtQuery) query.whereNotNull('deleted_at');
+        else query.whereNull('deleted_at');
+      }
       if (order) {
         query.orderBy(order);
       } else if (fields.includes('sort')) {
         query.orderByRaw('if(`sort`>0,1,0) DESC,sort ASC').orderBy([{ column: 'sort', order: 'ASC' }]);
       }
-      const row = await query.first();
-      if (row) {
-        ['created_at', 'updated_at'].forEach(key => {
-          if (row[key]) {
-            row[key] = formatDateTime(row[key], SHANGHAI_TZ, FORMAT);
+      return await query.first()
+        .then((row) => {
+          if (row) {
+            row.created_at = formatDateTime(row?.created_at, SHANGHAI_TZ, FORMAT);
+            row.updated_at = formatDateTime(row?.updated_at, SHANGHAI_TZ, FORMAT);
           }
+          return _.cloneDeep(row || false); // JSON.parse(JSON.stringify(row || false));
+        })
+        .catch((error) => {
+          logInterface.writeError(__filename + ':' + error.toString());
+          return false;
         });
-      }
-      return _.cloneDeep(row || false);
     } catch (error) {
       logInterface.writeError(__filename + ':' + error.toString());
       return false;
@@ -82,15 +81,24 @@ const baseModel = {
       const fields = [...new Set([...this.$guarded, ...this.$fillable, ...this.$hidden])];
       const queryTotal = dbRead.from(this.$table).where(where);
       // 根据是否删除来添加相应的查询条件
-      handleDeletedAtQuery(queryTotal, fields, deletedAtQuery);
+      if (fields.includes('deleted_at')) {
+        if (deletedAtQuery) queryTotal.whereNotNull('deleted_at');
+        else queryTotal.whereNull('deleted_at');
+      }
       const total = await queryTotal.count(this.$primaryKey || 'id', { as: 'total' })
         .first()
-        .then((row) => row.total || 0)
-        .catch(() => 0);
+        .then((row) => {
+          return row.total || 0;
+        }).catch(() => {
+          return 0;
+        });
       if (total > 0) {
         const queryRows = dbRead.from(this.$table).where(where);
         // 根据是否删除来添加相应的查询条件
-        handleDeletedAtQuery(queryRows, fields, deletedAtQuery);
+        if (fields.includes('deleted_at')) {
+          if (deletedAtQuery) queryRows.whereNotNull('deleted_at');
+          else queryRows.whereNull('deleted_at');
+        }
         if (order) {
           queryRows.orderBy(order);
         } else if (fields.includes('sort')) {
@@ -98,21 +106,22 @@ const baseModel = {
             { column: knex.raw('CASE WHEN `sort` > 0 THEN 1 ELSE 0 END'), order: 'DESC' },
             { column: 'sort', order: 'ASC' }
           ]);
-          // queryRows.orderByRaw('if(`sort`>0,1,0) DESC,sort ASC').orderBy([{ column: 'sort', order: 'ASC' }]);
         }
         const rows = await queryRows.select(fields)
           .limit(limit)
           .offset(offset || 0)
-          .then(rows => rows.map(row => ({
-            ...row,
-            created_at: formatDateTime(row?.created_at, SHANGHAI_TZ, FORMAT),
-            updated_at: formatDateTime(row?.updated_at, SHANGHAI_TZ, FORMAT),
-          })))
+          .then((rows) => {
+            return rows.map(row => ({
+              ...row,
+              created_at: formatDateTime(row?.created_at, SHANGHAI_TZ, FORMAT),
+              updated_at: formatDateTime(row?.updated_at, SHANGHAI_TZ, FORMAT),
+            }));
+          })
           .catch((error) => {
             logInterface.writeError(__filename + ':' + error.toString());
             return [];
           });
-        return { total, list: rows };
+        return { total: total, list: rows };
       } else {
         return { total: 0, list: [] };
       }
@@ -139,11 +148,17 @@ const baseModel = {
       const fields = [...new Set([...this.$guarded, ...this.$fillable, ...this.$hidden])];
       const queryTotal = dbRead.from(this.$table).where(where);
       // 根据是否删除来添加相应的查询条件
-      handleDeletedAtQuery(queryTotal, fields, deletedAtQuery);
+      if (fields.includes('deleted_at')) {
+        if (deletedAtQuery) queryTotal.whereNotNull('deleted_at');
+        else queryTotal.whereNull('deleted_at');
+      }
       return await queryTotal.count(this.$primaryKey || 'id', { as: 'total' })
         .first()
-        .then(row => row.total || 0)
-        .catch(() => 0);
+        .then((row) => {
+          return row.total || 0;
+        }).catch(() => {
+          return 0;
+        });
     } catch (error) {
       logInterface.writeError(__filename + ':' + error.toString());
       return 0;
@@ -161,7 +176,10 @@ const baseModel = {
       const fields = [...new Set([...this.$guarded, ...this.$fillable, ...this.$hidden])];
       const queryRows = dbRead.from(this.$table).where(where);
       // 根据是否删除来添加相应的查询条件
-      handleDeletedAtQuery(queryRows, fields, deletedAtQuery);
+      if (fields.includes('deleted_at')) {
+        if (deletedAtQuery) queryRows.whereNotNull('deleted_at');
+        else queryRows.whereNull('deleted_at');
+      }
       if (order) {
         queryRows.orderBy(order);
       } else if (fields.includes('sort')) {
@@ -169,16 +187,19 @@ const baseModel = {
           { column: knex.raw('CASE WHEN `sort` > 0 THEN 1 ELSE 0 END'), order: 'DESC' },
           { column: 'sort', order: 'ASC' }
         ]);
+        // queryRows.orderByRaw('if(`sort`>0,1,0) DESC,sort ASC').orderBy([{ column: 'sort', order: 'ASC' }]);
       }
       return await queryRows.select(fields)
         .where(where)
         .limit(5000)
         .offset(0)
-        .then(rows => rows.map(row => ({
-          ...row,
-          created_at: formatDateTime(row?.created_at, SHANGHAI_TZ, FORMAT),
-          updated_at: formatDateTime(row?.updated_at, SHANGHAI_TZ, FORMAT),
-        })))
+        .then((rows) => {
+          return rows.map(row => ({
+            ...row,
+            created_at: formatDateTime(row?.created_at, SHANGHAI_TZ, FORMAT),
+            updated_at: formatDateTime(row?.updated_at, SHANGHAI_TZ, FORMAT),
+          }));
+        })
         .catch((error) => {
           logInterface.writeError(__filename + ':' + error.toString());
           return [];
@@ -209,21 +230,19 @@ const baseModel = {
       return result;
     }, {});
     if (fields.includes('updated_at')) dataRow['updated_at'] = dbWrite.fn.now();
-
-    try {
-      if (writeLogs) {
-        const result = await dbWrite(this.$table).select(fields).where(where);
+    if (writeLogs) {
+      return await dbWrite(this.$table).select(fields).where(where).then(async (result) => {
         if (result.length > 0) {
-          await dbWrite(this.$table).update({ ...dataRow }).where(where);
-          await writeLogs(result, dataRow);
+          await dbWrite(this.$table).update({ ...dataRow }).where(where).then(async () => {
+            if (result && writeLogs) await writeLogs(result, dataRow);
+          }).catch((error) => {
+            throw __filename + ':' + error.toString();
+          });
           return result.map(item => item.id);
         }
-      } else {
-        return await dbWrite(this.$table).update({ ...dataRow }).where(where);
-      }
-    } catch (error) {
-      logInterface.writeError({ file: __filename, error: error.toString() });
-      throw error;
+      });
+    } else {
+      return await dbWrite(this.$table).update({ ...dataRow }).where(where);
     }
   },
   save: async function (data, writeLogs = null) {
@@ -273,28 +292,38 @@ const baseModel = {
         });
     } else {
       try {
-        return await dbWrite(this.$table).select(fields).whereIn('id', Array.isArray(dataRow.id) ? dataRow.id : [dataRow.id] )
-          .then(async (result) => {
-            if (result.length > 0) {
-              await dbWrite(this.$table).update({ ...dataRow }).whereIn('id',Array.isArray(dataRow.id) ? dataRow.id : [dataRow.id])
-                .then(async () => {
-                  if (result && writeLogs) await writeLogs(result, dataRow);
-                }).catch((error) => {
-                  throw __filename + ':' + error.toString();
-                });
-              return result.map(item => item.id);
-            } else {
-              if (fields.includes('created_at')) dataRow['created_at'] = dbWrite.fn.now();
-              return await dbWrite(this.$table).insert({ ...dataRow })
-                .then(async (affects) => {
-                  if (affects[0] && writeLogs) await writeLogs(affects, dataRow);
-                  return affects;
-                })
-                .catch((error) => {
-                  throw __filename + ':' + error.toString();
-                });
-            }
-          });
+        return await dbWrite(this.$table).select(fields).where(function () {
+          if (Array.isArray(dataRow.id)) {
+            if (dataRow.id.length > 0) this.whereIn('id', dataRow.id);
+          } else {
+            this.where('id', dataRow.id);
+          }
+        }).then(async (result) => {
+          if (result.length > 0) {
+            await dbWrite(this.$table).update({ ...dataRow }).where(function () {
+              if (Array.isArray(dataRow.id)) {
+                if (dataRow.id.length > 0) this.whereIn('id', dataRow.id);
+              } else {
+                this.where('id', dataRow.id);
+              }
+            }).then(async () => {
+              if (result && writeLogs) await writeLogs(result, dataRow);
+            }).catch((error) => {
+              throw __filename + ':' + error.toString();
+            });
+            return result.map(item => item.id);
+          } else {
+            if (fields.includes('created_at')) dataRow['created_at'] = dbWrite.fn.now();
+            return await dbWrite(this.$table).insert({ ...dataRow })
+              .then(async (affects) => {
+                if (affects[0] && writeLogs) await writeLogs(affects, dataRow);
+                return affects;
+              })
+              .catch((error) => {
+                throw __filename + ':' + error.toString();
+              });
+          }
+        });
       } catch (error) {
         logInterface.writeError(__filename + ':' + error.toString());
         return false;
